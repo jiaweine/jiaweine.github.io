@@ -5,7 +5,15 @@ on:
     branches:
       - agent/high-fidelity-3d-redesign-v2
     paths:
-      - .github/workflows/visual-full-qa.yml
+      - 'index.html'
+      - 'portfolio.js'
+      - 'portfolio.css'
+      - 'refine-v3.css'
+      - '.github/workflows/visual-full-qa.yml'
+
+concurrency:
+  group: full-page-qa-${{ github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -24,14 +32,14 @@ jobs:
           CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
           FLAGS="--headless=new --no-sandbox --enable-webgl --ignore-gpu-blocklist --use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader --disable-dev-shm-usage"
           capture () {
-            local file="$1" url="$2"
-            "$CHROME" $FLAGS --window-size=1440,1100 --virtual-time-budget=8500 --screenshot="$file" "$url" 2>>chrome-full.log
+            local size="$1" file="$2" url="$3"
+            "$CHROME" $FLAGS --window-size="$size" --virtual-time-budget=8500 --screenshot="$file" "$url" 2>>chrome-full.log
             test -s "$file"
           }
-          capture qa-focus.png http://127.0.0.1:4173/#focus
-          capture qa-work.png http://127.0.0.1:4173/#work
-          capture qa-stack.png http://127.0.0.1:4173/#stack
-          "$CHROME" $FLAGS --window-size=390,844 --virtual-time-budget=8500 --screenshot=qa-mobile-long.png http://127.0.0.1:4173/#focus 2>>chrome-full.log
+          capture 1440,1100 qa-focus.png http://127.0.0.1:4173/#focus
+          capture 1440,1100 qa-work.png http://127.0.0.1:4173/#work
+          capture 1440,1100 qa-stack.png http://127.0.0.1:4173/#stack
+          capture 390,844 qa-mobile-focus.png http://127.0.0.1:4173/#focus
       - uses: actions/upload-artifact@v4
         with:
           name: full-page-visual-qa
@@ -39,5 +47,5 @@ jobs:
             qa-focus.png
             qa-work.png
             qa-stack.png
-            qa-mobile-long.png
+            qa-mobile-focus.png
             chrome-full.log
