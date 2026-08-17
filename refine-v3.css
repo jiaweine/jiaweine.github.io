@@ -21,6 +21,14 @@
   contain:paint;
 }
 .avatar3d canvas{width:100%!important;height:100%!important}
+/* Deep-linked sections must never depend on IntersectionObserver timing to become readable. */
+section:target .reveal,
+section:target.reveal{
+  opacity:1!important;
+  transform:none!important;
+  filter:none!important;
+  transition-delay:0ms!important;
+}
 .hero-copy{transform:translateY(-1.5%)}
 .display{max-width:720px}
 .hero-summary{max-width:570px}
