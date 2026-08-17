@@ -5,6 +5,10 @@ on:
     branches:
       - agent/high-fidelity-3d-redesign-v2
 
+concurrency:
+  group: visual-preview-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -23,7 +27,7 @@ jobs:
           FLAGS="--headless=new --no-sandbox --enable-webgl --ignore-gpu-blocklist --use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader --disable-dev-shm-usage"
           capture () {
             local size="$1" file="$2" url="$3"
-            "$CHROME" $FLAGS --window-size="$size" --virtual-time-budget=11000 --screenshot="$file" "$url" 2>>chrome.log
+            "$CHROME" $FLAGS --window-size="$size" --virtual-time-budget=9000 --screenshot="$file" "$url" 2>>chrome.log
             test -s "$file"
           }
           capture 1440,1100 preview-desktop.png http://127.0.0.1:4173/
