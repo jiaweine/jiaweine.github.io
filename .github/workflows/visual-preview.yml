@@ -4,6 +4,13 @@ on:
   push:
     branches:
       - agent/high-fidelity-3d-redesign-v2
+    paths:
+      - '*.html'
+      - '*.css'
+      - '*.js'
+      - 'assets/**'
+      - 'character-lab/**'
+      - '.github/workflows/visual-preview.yml'
 
 concurrency:
   group: visual-preview-${{ github.ref }}
