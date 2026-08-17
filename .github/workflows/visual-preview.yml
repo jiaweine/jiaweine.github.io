@@ -21,27 +21,21 @@ jobs:
         run: |
           python3 -m http.server 4173 >/tmp/portfolio-server.log 2>&1 &
           sleep 2
-      - name: Capture hero and key sections
+      - name: Capture desktop and mobile hero
         run: |
           CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
           FLAGS="--headless=new --no-sandbox --enable-webgl --ignore-gpu-blocklist --use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader --disable-dev-shm-usage"
           capture () {
-            local size="$1" file="$2" url="$3"
-            "$CHROME" $FLAGS --window-size="$size" --virtual-time-budget=9000 --screenshot="$file" "$url" 2>>chrome.log
+            local size="$1" file="$2"
+            "$CHROME" $FLAGS --window-size="$size" --virtual-time-budget=9000 --screenshot="$file" http://127.0.0.1:4173/ 2>>chrome.log
             test -s "$file"
           }
-          capture 1440,1100 preview-desktop.png http://127.0.0.1:4173/
-          capture 390,844 preview-mobile.png http://127.0.0.1:4173/
-          capture 1440,1100 preview-focus.png http://127.0.0.1:4173/#focus
-          capture 1440,1100 preview-work.png http://127.0.0.1:4173/#work
-          capture 1440,1100 preview-stack.png http://127.0.0.1:4173/#stack
+          capture 1440,1100 preview-desktop.png
+          capture 390,844 preview-mobile.png
       - uses: actions/upload-artifact@v4
         with:
           name: visual-preview
           path: |
             preview-desktop.png
             preview-mobile.png
-            preview-focus.png
-            preview-work.png
-            preview-stack.png
             chrome.log
