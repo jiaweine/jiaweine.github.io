@@ -33,11 +33,12 @@ jobs:
           cp -a /tmp/CharMorph "$BLENDER_ADDONS/CharMorph"
           blender --version | tee /tmp/vt-blender-version.txt
           du -sh /tmp/vitruvian /tmp/CharMorph | tee /tmp/vt-source-size.txt
-      - name: Generate East Asian male and web GLB
+      - name: Generate East Asian male preview and clean GLB
         id: generate
         run: |
           cat > /tmp/build_vitruvian.py <<'PY'
-          import bpy, os, sys, traceback, math
+          import bpy, os, traceback
+          from mathutils import Vector
 
           LOG=[]
           def log(*args):
@@ -68,8 +69,6 @@ jobs:
               m=mm.morpher
               if not m: raise RuntimeError('CharMorph morpher unavailable after import')
 
-              # Deliberately mix an East-Asian macro base with youthful JRPG proportions
-              # and a restrained masculine jaw. Keep values below extremes to avoid an uncanny caricature.
               morph_data={
                   'type':['Default'],
                   'morphs':{
@@ -129,62 +128,76 @@ jobs:
                   },
                   'meta':{}
               }
-              # Select the standard base type first, then apply data exactly as CharMorph's import operator does.
               m.set_L1('Default', False)
               m.apply_morph_data(morph_data, False)
               bpy.context.view_layer.update()
               log('MORPHS_APPLIED')
 
-              # Record mesh/material inventory and make a static web candidate. The final hero can be re-rigged later.
               meshes=[o for o in bpy.context.scene.objects if o.type=='MESH']
               log('MESHES', [(o.name,len(o.data.vertices),[mat.name for mat in o.data.materials if mat]) for o in meshes])
-              for o in bpy.context.scene.objects: o.select_set(False)
+              if not meshes: raise RuntimeError('No generated mesh')
               for o in meshes:
-                  o.hide_viewport=False; o.hide_render=False; o.select_set(True)
-              if meshes: bpy.context.view_layer.objects.active=meshes[0]
+                  o.hide_viewport=False; o.hide_render=False
 
               os.makedirs('character-lab',exist_ok=True)
-              # First try a direct binary glTF export. We only export visible meshes for this look-dev candidate.
-              out=os.path.abspath('character-lab/vitruvian-eastasian-male.glb')
-              res=bpy.ops.export_scene.gltf(
-                  filepath=out,
-                  export_format='GLB',
-                  use_selection=True,
-                  export_animations=False,
-                  export_apply=True,
-                  export_yup=True
-              )
-              log('GLTF_EXPORT', res, out, os.path.getsize(out) if os.path.exists(out) else 'missing')
 
-              # Build a neutral Blender preview from the same evaluated character.
-              world=bpy.data.worlds.new('LabWorld'); bpy.context.scene.world=world
-              world.color=(0.006,0.008,0.007)
-              def area(name,loc,energy,size,color):
-                  data=bpy.data.lights.new(name,'AREA'); data.energy=energy; data.shape='DISK'; data.size=size; data.color=color
-                  obj=bpy.data.objects.new(name,data); bpy.context.collection.objects.link(obj); obj.location=loc
-                  direction=(bpy.context.scene.cursor.location-obj.location).normalized(); obj.rotation_euler=direction.to_track_quat('-Z','Y').to_euler(); return obj
-              area('Key',(-2.4,-3.0,4.8),900,3.4,(1.0,.88,.80))
-              area('Fill',(2.7,-1.8,3.4),420,3.0,(.72,.82,1.0))
-              area('Rim',(1.8,2.2,4.6),650,2.6,(.62,.78,1.0))
-              cam_data=bpy.data.cameras.new('Camera'); cam=bpy.data.objects.new('Camera',cam_data); bpy.context.collection.objects.link(cam); bpy.context.scene.camera=cam
-              # frame all meshes, then target upper body/head
-              from mathutils import Vector
+              # Compute actual bounds first so camera and all lights target the face instead of world origin.
               coords=[]
               for o in meshes:
                   for corner in o.bound_box: coords.append(o.matrix_world @ Vector(corner))
-              if coords:
-                  minv=Vector((min(p.x for p in coords),min(p.y for p in coords),min(p.z for p in coords)))
-                  maxv=Vector((max(p.x for p in coords),max(p.y for p in coords),max(p.z for p in coords)))
-                  center=(minv+maxv)/2; height=maxv.z-minv.z
-              else:
-                  center=Vector((0,0,1.5)); height=1.8
-              target=Vector((center.x,center.y,maxv.z-height*.16 if coords else 1.62))
-              cam.location=(target.x,target.y-2.45,target.z+.03); cam.rotation_euler=(target-cam.location).to_track_quat('-Z','Y').to_euler(); cam.data.lens=72
-              scene=bpy.context.scene; scene.render.engine='BLENDER_EEVEE_NEXT'; scene.render.resolution_x=900; scene.render.resolution_y=900; scene.render.resolution_percentage=100
-              scene.render.image_settings.file_format='PNG'; scene.render.filepath=os.path.abspath('character-lab/vitruvian-eastasian-male-preview.png')
+              minv=Vector((min(p.x for p in coords),min(p.y for p in coords),min(p.z for p in coords)))
+              maxv=Vector((max(p.x for p in coords),max(p.y for p in coords),max(p.z for p in coords)))
+              center=(minv+maxv)/2; height=maxv.z-minv.z
+              target=Vector((center.x,center.y,maxv.z-height*.145))
+              log('BOUNDS', tuple(round(v,4) for v in minv), tuple(round(v,4) for v in maxv), 'TARGET', tuple(round(v,4) for v in target))
+
+              world=bpy.data.worlds.new('LabWorld'); bpy.context.scene.world=world
+              world.use_nodes=True
+              world.node_tree.nodes['Background'].inputs['Color'].default_value=(0.004,0.006,0.005,1)
+              world.node_tree.nodes['Background'].inputs['Strength'].default_value=.12
+
+              def area(name,loc,energy,size,color):
+                  data=bpy.data.lights.new(name,'AREA'); data.energy=energy; data.shape='DISK'; data.size=size; data.color=color
+                  obj=bpy.data.objects.new(name,data); bpy.context.collection.objects.link(obj); obj.location=loc
+                  obj.rotation_euler=(target-obj.location).to_track_quat('-Z','Y').to_euler(); return obj
+              area('Key',(target.x-1.45,target.y-2.0,target.z+1.65),760,2.5,(1.0,.91,.84))
+              area('Fill',(target.x+1.65,target.y-1.45,target.z+.75),300,2.8,(.73,.83,1.0))
+              area('Rim',(target.x+1.2,target.y+1.6,target.z+1.45),560,2.25,(.62,.78,1.0))
+
+              cam_data=bpy.data.cameras.new('Camera'); cam=bpy.data.objects.new('Camera',cam_data); bpy.context.collection.objects.link(cam); bpy.context.scene.camera=cam
+              cam.location=(target.x+.08,target.y-1.22,target.z+.01)
+              cam.rotation_euler=(target-cam.location).to_track_quat('-Z','Y').to_euler(); cam.data.lens=78
+
+              scene=bpy.context.scene
+              scene.render.engine='BLENDER_EEVEE_NEXT'
+              scene.render.resolution_x=900; scene.render.resolution_y=900; scene.render.resolution_percentage=100
+              scene.render.image_settings.file_format='PNG'
+              scene.render.film_transparent=False
+              scene.render.filepath=os.path.abspath('character-lab/vitruvian-eastasian-male-preview.png')
               scene.view_settings.look='AgX - Medium High Contrast'
               bpy.ops.render.render(write_still=True)
-              log('PREVIEW_WRITTEN', scene.render.filepath)
+              if not os.path.exists(scene.render.filepath): raise RuntimeError('Preview render missing')
+              log('PREVIEW_WRITTEN', scene.render.filepath, os.path.getsize(scene.render.filepath))
+
+              # Only after visual QA is safely rendered, strip the UDIM material graph from a copied mesh
+              # and export a clean geometry candidate. This bypasses Blender glTF's packed-UDIM limitation.
+              export_objs=[]
+              neutral=bpy.data.materials.new('CharacterLabNeutral'); neutral.diffuse_color=(.55,.36,.27,1); neutral.roughness=.62
+              for src in meshes:
+                  dup=src.copy(); dup.data=src.data.copy(); bpy.context.collection.objects.link(dup)
+                  dup.name=src.name+'_web'
+                  dup.data.materials.clear(); dup.data.materials.append(neutral)
+                  export_objs.append(dup)
+                  src.hide_render=True
+              for o in bpy.context.scene.objects: o.select_set(False)
+              for o in export_objs: o.select_set(True)
+              bpy.context.view_layer.objects.active=export_objs[0]
+              out=os.path.abspath('character-lab/vitruvian-eastasian-male-neutral.glb')
+              res=bpy.ops.export_scene.gltf(filepath=out,export_format='GLB',use_selection=True,export_animations=False,export_apply=True,export_yup=True)
+              if not os.path.exists(out): raise RuntimeError('Neutral GLB export missing')
+              log('GLTF_EXPORT', res, out, os.path.getsize(out))
+
+              with open('/tmp/vt-build-ok','w') as f: f.write('ok')
           except Exception:
               traceback.print_exc()
               raise
@@ -193,12 +206,10 @@ jobs:
                   with open('/tmp/vt-build-summary.txt','w') as f: f.write('\n'.join(LOG))
               except Exception: pass
           PY
-          set +e
-          blender --background --python /tmp/build_vitruvian.py > /tmp/vt-blender.log 2>&1
-          status=$?
-          set -e
-          tail -n 240 /tmp/vt-blender.log
-          exit $status
+          blender --background --python /tmp/build_vitruvian.py > /tmp/vt-blender.log 2>&1 || true
+          tail -n 260 /tmp/vt-blender.log
+          test -f /tmp/vt-build-ok
+          test -s character-lab/vitruvian-eastasian-male-preview.png
       - name: Upload character lab
         if: always()
         uses: actions/upload-artifact@v4
