@@ -19,6 +19,10 @@ jobs:
         uses: moguri/setup-blender@v1
         with:
           blender-version: '4.3'
+      - name: Install headless rendering runtime
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y libegl1 libgl1
       - name: Prepare CharMorph and CC0 Vitruvian data
         run: |
           git lfs install
@@ -141,7 +145,6 @@ jobs:
 
               os.makedirs('character-lab',exist_ok=True)
 
-              # Compute actual bounds first so camera and all lights target the face instead of world origin.
               coords=[]
               for o in meshes:
                   for corner in o.bound_box: coords.append(o.matrix_world @ Vector(corner))
@@ -179,8 +182,6 @@ jobs:
               if not os.path.exists(scene.render.filepath): raise RuntimeError('Preview render missing')
               log('PREVIEW_WRITTEN', scene.render.filepath, os.path.getsize(scene.render.filepath))
 
-              # Only after visual QA is safely rendered, strip the UDIM material graph from a copied mesh
-              # and export a clean geometry candidate. This bypasses Blender glTF's packed-UDIM limitation.
               export_objs=[]
               neutral=bpy.data.materials.new('CharacterLabNeutral'); neutral.diffuse_color=(.55,.36,.27,1); neutral.roughness=.62
               for src in meshes:
