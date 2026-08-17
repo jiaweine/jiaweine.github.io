@@ -24,13 +24,16 @@ jobs:
           FLAGS="--headless=new --no-sandbox --enable-webgl --ignore-gpu-blocklist --use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader --disable-dev-shm-usage"
           "$CHROME" $FLAGS --window-size=1440,1100 --virtual-time-budget=14000 --screenshot=preview-desktop.png http://127.0.0.1:4173/ 2>chrome-desktop.log
           "$CHROME" $FLAGS --window-size=390,844 --virtual-time-budget=14000 --screenshot=preview-mobile.png http://127.0.0.1:4173/ 2>chrome-mobile.log
+          curl -L --fail --retry 2 https://raw.githubusercontent.com/ibrews/VitruvianGodot/main/docs/vitruvian_head.png -o reference-vitruvian-head.png
           test -s preview-desktop.png
           test -s preview-mobile.png
+          test -s reference-vitruvian-head.png
       - uses: actions/upload-artifact@v4
         with:
           name: visual-preview
           path: |
             preview-desktop.png
             preview-mobile.png
+            reference-vitruvian-head.png
             chrome-desktop.log
             chrome-mobile.log
