@@ -20,7 +20,7 @@ jobs:
           python3 -m pip install --quiet pillow
           python3 - <<'PY'
           import os, urllib.request
-          from PIL import Image, ImageOps, ImageDraw, ImageFont
+          from PIL import Image, ImageOps, ImageDraw, ImageChops
 
           root='/tmp/rocketbox-males'
           os.makedirs(root, exist_ok=True)
@@ -31,22 +31,28 @@ jobs:
               path=f'{root}/{n}.png'
               urllib.request.urlretrieve(url,path)
               im=Image.open(path).convert('RGB')
-              # crop upper half to emphasize face / hair / age while preserving enough clothing context
-              w,h=im.size
-              crop=im.crop((0,0,w,int(h*.72)))
-              crop=ImageOps.contain(crop,(280,250),Image.Resampling.LANCZOS)
-              tile=Image.new('RGB',(300,300),(18,20,19))
-              x=(300-crop.width)//2; y=8
-              tile.paste(crop,(x,y))
+              bg=Image.new('RGB',im.size,(0,0,0))
+              diff=ImageChops.difference(im,bg).convert('L').point(lambda p:255 if p>8 else 0)
+              bbox=diff.getbbox() or (0,0,*im.size)
+              x0,y0,x1,y1=bbox
+              bw,bh=x1-x0,y1-y0
+              # Head/shoulder crop: top ~43% of detected body, with lateral padding.
+              cx=(x0+x1)/2
+              head_bottom=y0+bh*.43
+              crop_w=max(bw*.72,(head_bottom-y0)*.86)
+              crop=im.crop((max(0,cx-crop_w/2),max(0,y0-bh*.015),min(im.width,cx+crop_w/2),min(im.height,head_bottom)))
+              crop=ImageOps.fit(crop,(300,255),method=Image.Resampling.LANCZOS,centering=(.5,.34))
+              tile=Image.new('RGB',(320,310),(17,19,18))
+              tile.paste(crop,(10,8))
               d=ImageDraw.Draw(tile)
-              d.rectangle((0,260,300,300),fill=(10,12,11))
-              d.text((14,272),f'Male_Adult_{n}',fill=(232,235,232))
+              d.rectangle((0,270,320,310),fill=(8,10,9))
+              d.text((14,282),f'Male_Adult_{n}',fill=(236,239,236))
               imgs.append(tile)
           cols=4; rows=(len(imgs)+cols-1)//cols
-          sheet=Image.new('RGB',(cols*300,rows*300),(7,9,8))
+          sheet=Image.new('RGB',(cols*320,rows*310),(6,8,7))
           for idx,tile in enumerate(imgs):
-              sheet.paste(tile,((idx%cols)*300,(idx//cols)*300))
-          sheet.save('rocketbox-male-contact-sheet.jpg',quality=92,optimize=True)
+              sheet.paste(tile,((idx%cols)*320,(idx//cols)*310))
+          sheet.save('rocketbox-male-contact-sheet.jpg',quality=94,optimize=True)
           PY
       - uses: actions/upload-artifact@v4
         with:
