@@ -45,7 +45,6 @@ try {
   const shirt2 = new THREE.MeshStandardMaterial({ color:0x343531, roughness:.65 });
   const silver = new THREE.MeshStandardMaterial({ color:0xc9cdd0, roughness:.19, metalness:.92 });
   const dark = new THREE.MeshStandardMaterial({ color:0x1c1d1a, roughness:.52 });
-  const accent = new THREE.MeshStandardMaterial({ color:0xd65f3d, roughness:.48 });
   const deskMat = new THREE.MeshStandardMaterial({ color:0x6d513e, roughness:.78 });
   const keyMat = new THREE.MeshStandardMaterial({ color:0xe5e0d6, roughness:.62 });
   const screenMat = new THREE.MeshStandardMaterial({ color:0x171a18, emissive:0x283d32, emissiveIntensity:.5, roughness:.35 });
@@ -88,7 +87,7 @@ try {
 
   box([4.4,.18,1.42],deskMat,[.58,-.73,1.30],[0,0,0]);
   box([1.78,.10,.62],keyMat,[.08,-.54,1.67],[-.12,0,0]);
-  for(let r=0;r<3;r++) for(let c=0;c<8;c++) box([.14,.035,.10],shirt2,[-.50+c*.15,-.48,1.95+r*.13],[-.12,0,0]);
+  for(let r=0;r<3;r++) for(let c=0;c<8;c++) box([.14,.035,.10],shirt2,[-.50+c*.15,-.48,1.48+r*.15],[-.12,0,0]);
   box([2.18,1.46,.10],dark,[1.70,.55,.93],[0,-.23,0]);
   const screen=box([1.92,1.20,.025],screenMat,[1.66,.57,.82],[0,-.23,0]);
   box([.12,.70,.12],silver,[1.66,-.50,.94],[0,-.23,0]);
