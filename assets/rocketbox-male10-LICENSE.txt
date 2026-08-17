@@ -1,0 +1,4 @@
+Microsoft Rocketbox asset derived from microsoft/Microsoft-Rocketbox.
+Copyright (c) 2020 Microsoft.
+Licensed under the MIT License.
+Source: Assets/Avatars/Adults/Male_Adult_10.

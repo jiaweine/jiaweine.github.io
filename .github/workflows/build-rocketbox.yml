@@ -1,0 +1,116 @@
+name: Build Rocketbox Portrait Asset
+
+on:
+  push:
+    branches:
+      - agent/high-fidelity-3d-redesign-v2
+    paths:
+      - .github/workflows/build-rocketbox.yml
+
+concurrency:
+  group: rocketbox-build-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/high-fidelity-3d-redesign-v2
+      - name: Set up Blender 3.6
+        uses: moguri/setup-blender@v1
+        with:
+          blender-version: '3.6'
+      - name: Download Microsoft Rocketbox Asian male source
+        run: |
+          blender --version | tee /tmp/blender-version.txt
+          mkdir -p /tmp/rocketbox assets
+          BASE='https://raw.githubusercontent.com/microsoft/Microsoft-Rocketbox/master/Assets/Avatars/Adults/Male_Adult_10'
+          curl -L --fail "$BASE/Export/Male_Adult_10_facial.fbx" -o /tmp/rocketbox/Male_Adult_10_facial.fbx
+          for file in \
+            m024_body_color.tga \
+            m024_body_normal.tga \
+            m024_body_specular.tga \
+            m024_head_color.tga \
+            m024_head_normal.tga \
+            m024_head_specular.tga \
+            m024_opacity_color.tga; do
+            curl -L --fail "$BASE/Textures/$file" -o "/tmp/rocketbox/$file"
+          done
+          du -h /tmp/rocketbox/* | tee /tmp/source-info.txt
+      - name: Convert FBX to optimized web GLB
+        id: convert
+        shell: bash
+        run: |
+          cat > /tmp/export_rocketbox.py <<'PY'
+          import bpy, os, traceback
+          src='/tmp/rocketbox/Male_Adult_10_facial.fbx'
+          out=os.path.abspath('assets/rocketbox-male10.glb')
+          try:
+              bpy.ops.wm.read_factory_settings(use_empty=True)
+              print('BLENDER', bpy.app.version_string)
+              result=bpy.ops.import_scene.fbx(filepath=src, use_image_search=True)
+              print('IMPORT_RESULT', result)
+              print('OBJECTS')
+              for o in bpy.context.scene.objects:
+                  print(' ', o.name, o.type, tuple(round(v,4) for v in o.dimensions))
+              print('IMAGES_BEFORE')
+              for img in bpy.data.images:
+                  print(' ', img.name, img.filepath, tuple(img.size))
+                  if img.size[0] > 1024 or img.size[1] > 1024:
+                      factor=min(1024/img.size[0],1024/img.size[1])
+                      img.scale(max(1,int(img.size[0]*factor)),max(1,int(img.size[1]*factor)))
+              print('IMAGES_AFTER', [(i.name, tuple(i.size)) for i in bpy.data.images])
+              result=bpy.ops.export_scene.gltf(
+                  filepath=out,
+                  export_format='GLB',
+                  export_yup=True,
+                  export_animations=False,
+                  export_apply=True
+              )
+              print('EXPORT_RESULT', result)
+              print('WROTE', out, os.path.getsize(out))
+          except Exception:
+              traceback.print_exc()
+              raise
+          PY
+          set +e
+          blender --background --python /tmp/export_rocketbox.py > /tmp/blender.log 2>&1
+          status=$?
+          set -e
+          cat /tmp/blender.log
+          if [ $status -ne 0 ]; then exit $status; fi
+          ls -lh assets/rocketbox-male10.glb | tee /tmp/output-info.txt
+      - name: Upload conversion diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rocketbox-build-diagnostics
+          path: |
+            /tmp/blender.log
+            /tmp/blender-version.txt
+            /tmp/source-info.txt
+            /tmp/output-info.txt
+          if-no-files-found: ignore
+      - name: Add attribution
+        if: steps.convert.outcome == 'success'
+        run: |
+          cat > assets/rocketbox-male10-LICENSE.txt <<'TXT'
+          Microsoft Rocketbox asset derived from microsoft/Microsoft-Rocketbox.
+          Copyright (c) 2020 Microsoft.
+          Licensed under the MIT License.
+          Source: Assets/Avatars/Adults/Male_Adult_10.
+          TXT
+      - name: Commit generated web asset
+        if: steps.convert.outcome == 'success'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/rocketbox-male10.glb assets/rocketbox-male10-LICENSE.txt
+          git commit -m 'Add optimized Rocketbox Asian male portrait asset'
+          git push origin HEAD:agent/high-fidelity-3d-redesign-v2

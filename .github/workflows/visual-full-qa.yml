@@ -1,0 +1,81 @@
+name: Full Page Visual QA
+
+on:
+  push:
+    branches:
+      - agent/high-fidelity-3d-redesign-v2
+    paths:
+      - 'index.html'
+      - 'portfolio.js'
+      - 'portfolio.css'
+      - 'refine-v3.css'
+      - '.github/workflows/visual-full-qa.yml'
+
+concurrency:
+  group: full-page-qa-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Start local server
+        run: |
+          python3 -m http.server 4173 >/tmp/full-qa-server.log 2>&1 &
+          sleep 2
+      - name: Capture key sections with Puppeteer
+        run: |
+          npm install --silent puppeteer-core@24
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          export CHROME
+          cat > ./full-qa.mjs <<'JS'
+          import puppeteer from 'puppeteer-core';
+          const browser=await puppeteer.launch({
+            executablePath:process.env.CHROME,
+            headless:true,
+            args:['--no-sandbox','--enable-webgl','--ignore-gpu-blocklist','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage']
+          });
+          const page=await browser.newPage();
+          page.on('console',m=>console.log('PAGE',m.type(),m.text()));
+          page.on('pageerror',e=>console.error('PAGEERROR',e.message));
+          async function open(width,height){
+            await page.setViewport({width,height,deviceScaleFactor:1});
+            await page.goto('http://127.0.0.1:4173/',{waitUntil:'networkidle2',timeout:120000});
+            await new Promise(r=>setTimeout(r,1200));
+          }
+          async function shot(id,file){
+            await page.evaluate((selector)=>{
+              document.documentElement.style.scrollBehavior='auto';
+              document.querySelector(selector)?.scrollIntoView({block:'start',behavior:'auto'});
+            },id);
+            await new Promise(r=>setTimeout(r,900));
+            await page.screenshot({path:file,fullPage:false});
+          }
+          await open(1440,1100);
+          await shot('#focus','qa-focus.png');
+          await shot('#work','qa-work.png');
+          await shot('#stack','qa-stack.png');
+          await open(390,844);
+          await shot('#focus','qa-mobile-focus.png');
+          await browser.close();
+          JS
+          node ./full-qa.mjs 2>&1 | tee browser-full.log
+          rm -f ./full-qa.mjs
+          test -s qa-focus.png && test -s qa-work.png && test -s qa-stack.png && test -s qa-mobile-focus.png
+      - uses: actions/upload-artifact@v4
+        with:
+          name: full-page-visual-qa
+          path: |
+            qa-focus.png
+            qa-work.png
+            qa-stack.png
+            qa-mobile-focus.png
+            browser-full.log
+            /tmp/full-qa-server.log

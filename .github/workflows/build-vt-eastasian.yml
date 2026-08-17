@@ -1,0 +1,225 @@
+name: Build Vitruvian East Asian Character Lab
+
+on:
+  push:
+    branches:
+      - agent/high-fidelity-3d-redesign-v2
+    paths:
+      - .github/workflows/build-vt-eastasian.yml
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Blender
+        uses: moguri/setup-blender@v1
+        with:
+          blender-version: '4.3'
+      - name: Install headless rendering runtime
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y libegl1 libgl1
+      - name: Prepare CharMorph and CC0 Vitruvian data
+        run: |
+          git lfs install
+          git clone --recursive --depth 1 https://github.com/Upliner/CharMorph.git /tmp/CharMorph
+          git clone --depth 1 https://github.com/Upliner/CharMorph-Vitruvian.git /tmp/vitruvian
+          cd /tmp/vitruvian
+          git lfs pull
+          mkdir -p /tmp/CharMorph/data/characters/vitruvian
+          cp -a /tmp/vitruvian/. /tmp/CharMorph/data/characters/vitruvian/
+          BLENDER_ADDONS="$HOME/.config/blender/4.3/scripts/addons"
+          mkdir -p "$BLENDER_ADDONS"
+          cp -a /tmp/CharMorph "$BLENDER_ADDONS/CharMorph"
+          blender --version | tee /tmp/vt-blender-version.txt
+          du -sh /tmp/vitruvian /tmp/CharMorph | tee /tmp/vt-source-size.txt
+      - name: Generate East Asian male preview and clean GLB
+        id: generate
+        run: |
+          cat > /tmp/build_vitruvian.py <<'PY'
+          import bpy, os, traceback
+          from mathutils import Vector
+
+          LOG=[]
+          def log(*args):
+              s=' '.join(str(a) for a in args); print(s, flush=True); LOG.append(s)
+
+          try:
+              bpy.ops.wm.read_factory_settings(use_empty=True)
+              log('BLENDER', bpy.app.version_string)
+              result=bpy.ops.preferences.addon_enable(module='CharMorph')
+              log('ADDON_ENABLE', result)
+              from CharMorph.lib.charlib import library
+              from CharMorph.common import manager as mm
+
+              library.load()
+              log('LIBRARY_DIR', library.dirpath)
+              log('CHARACTERS', sorted(library.chars.keys()))
+              candidates=[k for k in library.chars.keys() if 'vitruv' in k.lower()]
+              if not candidates: raise RuntimeError('Vitruvian character was not discovered by CharMorph')
+              char_key=candidates[0]
+              ui=bpy.context.window_manager.charmorph_ui
+              ui.base_model=char_key
+              if hasattr(ui,'use_sk'): ui.use_sk=False
+              if hasattr(ui,'import_morphs'): ui.import_morphs=False
+              if hasattr(ui,'import_expressions'): ui.import_expressions=False
+              log('IMPORTING', char_key)
+              res=bpy.ops.charmorph.import_char()
+              log('IMPORT_RESULT', res)
+              m=mm.morpher
+              if not m: raise RuntimeError('CharMorph morpher unavailable after import')
+
+              morph_data={
+                  'type':['Default'],
+                  'morphs':{
+                      'Gender_Male':0.86,
+                      'Race_EastAsian':1.0,
+                      'Race_White':0.0,
+                      'Age_Old':0.0,
+                      'Age_Baby':0.0,
+                      'BodyType_Lean':0.22,
+                      'BodyType_MesoMorph':0.12,
+                      'Cheeks_BuccalFat':0.08,
+                      'Cheeks_UpperCheek_Bone':0.34,
+                      'Chin_Height':-0.14,
+                      'Chin_SecondaryWidth':0.34,
+                      'Chin_Width':-0.42,
+                      'Chin_Portrusion':0.08,
+                      'Jaw_Definition':0.42,
+                      'Jaw_Mandible':0.20,
+                      'Jaw_Mandible_GonialAngle':-0.25,
+                      'Jaw_Ramus_LocY':-0.22,
+                      'Jaw_Width':0.24,
+                      'Eyes_Eyelid_Monolid':0.72,
+                      'Eyes_Eyelid_hooded':0.18,
+                      'Eyes_EyelidsAngle':-0.04,
+                      'Eyes_EyelidsAngle2':-0.03,
+                      'Eyes_EyelidsCrease':-0.18,
+                      'Eyes_UpperLidOpenness':-0.14,
+                      'Eyes_LowerLidOpenness':-0.06,
+                      'Eyes_Size':-0.10,
+                      'Eyes_EyebrowsDroop':-0.10,
+                      'Face_BrowRidge_Droop':0.16,
+                      'Face_FrontalBone_BrowRidge':0.12,
+                      'Face_Zygomatic_Bone':0.22,
+                      'Nose_BridgeProminence':-0.12,
+                      'Nose_NasalAngle':0.24,
+                      'Nose_Potrusion':-0.35,
+                      'Nose_Tip_Potrusion':-0.10,
+                      'Nose_NostrilSize':-0.08,
+                      'Mouth_Lips_Length':0.12,
+                      'Mouth_Lips_UpperLipDepth':-0.16,
+                      'Mouth_PhiltrumHeight':-0.12,
+                      'Generic_Assymetry':0.055,
+                  },
+                  'materials':{
+                      'EastAsian':1.0,
+                      'Estrogen':0.06,
+                      "Five O' Clock Shadow":0.0,
+                      'Global Bump Strength':1.12,
+                      'Micro Bump Strength':1.05,
+                      'Roughness Multiplier':0.88,
+                      'Scalp Tan':0.12,
+                      'Sclera Redness':0.04,
+                      'Sclera Yellowness':0.02,
+                      'Subsurface Scale Multiplier':1.12,
+                      'Tone':0.08,
+                      'Value':1.0,
+                  },
+                  'meta':{}
+              }
+              m.set_L1('Default', False)
+              m.apply_morph_data(morph_data, False)
+              bpy.context.view_layer.update()
+              log('MORPHS_APPLIED')
+
+              meshes=[o for o in bpy.context.scene.objects if o.type=='MESH']
+              log('MESHES', [(o.name,len(o.data.vertices),[mat.name for mat in o.data.materials if mat]) for o in meshes])
+              if not meshes: raise RuntimeError('No generated mesh')
+              for o in meshes:
+                  o.hide_viewport=False; o.hide_render=False
+
+              os.makedirs('character-lab',exist_ok=True)
+
+              coords=[]
+              for o in meshes:
+                  for corner in o.bound_box: coords.append(o.matrix_world @ Vector(corner))
+              minv=Vector((min(p.x for p in coords),min(p.y for p in coords),min(p.z for p in coords)))
+              maxv=Vector((max(p.x for p in coords),max(p.y for p in coords),max(p.z for p in coords)))
+              center=(minv+maxv)/2; height=maxv.z-minv.z
+              target=Vector((center.x,center.y,maxv.z-height*.145))
+              log('BOUNDS', tuple(round(v,4) for v in minv), tuple(round(v,4) for v in maxv), 'TARGET', tuple(round(v,4) for v in target))
+
+              world=bpy.data.worlds.new('LabWorld'); bpy.context.scene.world=world
+              world.use_nodes=True
+              world.node_tree.nodes['Background'].inputs['Color'].default_value=(0.004,0.006,0.005,1)
+              world.node_tree.nodes['Background'].inputs['Strength'].default_value=.12
+
+              def area(name,loc,energy,size,color):
+                  data=bpy.data.lights.new(name,'AREA'); data.energy=energy; data.shape='DISK'; data.size=size; data.color=color
+                  obj=bpy.data.objects.new(name,data); bpy.context.collection.objects.link(obj); obj.location=loc
+                  obj.rotation_euler=(target-obj.location).to_track_quat('-Z','Y').to_euler(); return obj
+              area('Key',(target.x-1.45,target.y-2.0,target.z+1.65),760,2.5,(1.0,.91,.84))
+              area('Fill',(target.x+1.65,target.y-1.45,target.z+.75),300,2.8,(.73,.83,1.0))
+              area('Rim',(target.x+1.2,target.y+1.6,target.z+1.45),560,2.25,(.62,.78,1.0))
+
+              cam_data=bpy.data.cameras.new('Camera'); cam=bpy.data.objects.new('Camera',cam_data); bpy.context.collection.objects.link(cam); bpy.context.scene.camera=cam
+              cam.location=(target.x+.08,target.y-1.22,target.z+.01)
+              cam.rotation_euler=(target-cam.location).to_track_quat('-Z','Y').to_euler(); cam.data.lens=78
+
+              scene=bpy.context.scene
+              scene.render.engine='BLENDER_EEVEE_NEXT'
+              scene.render.resolution_x=900; scene.render.resolution_y=900; scene.render.resolution_percentage=100
+              scene.render.image_settings.file_format='PNG'
+              scene.render.film_transparent=False
+              scene.render.filepath=os.path.abspath('character-lab/vitruvian-eastasian-male-preview.png')
+              scene.view_settings.look='AgX - Medium High Contrast'
+              bpy.ops.render.render(write_still=True)
+              if not os.path.exists(scene.render.filepath): raise RuntimeError('Preview render missing')
+              log('PREVIEW_WRITTEN', scene.render.filepath, os.path.getsize(scene.render.filepath))
+
+              export_objs=[]
+              neutral=bpy.data.materials.new('CharacterLabNeutral'); neutral.diffuse_color=(.55,.36,.27,1); neutral.roughness=.62
+              for src in meshes:
+                  dup=src.copy(); dup.data=src.data.copy(); bpy.context.collection.objects.link(dup)
+                  dup.name=src.name+'_web'
+                  dup.data.materials.clear(); dup.data.materials.append(neutral)
+                  export_objs.append(dup)
+                  src.hide_render=True
+              for o in bpy.context.scene.objects: o.select_set(False)
+              for o in export_objs: o.select_set(True)
+              bpy.context.view_layer.objects.active=export_objs[0]
+              out=os.path.abspath('character-lab/vitruvian-eastasian-male-neutral.glb')
+              res=bpy.ops.export_scene.gltf(filepath=out,export_format='GLB',use_selection=True,export_animations=False,export_apply=True,export_yup=True)
+              if not os.path.exists(out): raise RuntimeError('Neutral GLB export missing')
+              log('GLTF_EXPORT', res, out, os.path.getsize(out))
+
+              with open('/tmp/vt-build-ok','w') as f: f.write('ok')
+          except Exception:
+              traceback.print_exc()
+              raise
+          finally:
+              try:
+                  with open('/tmp/vt-build-summary.txt','w') as f: f.write('\n'.join(LOG))
+              except Exception: pass
+          PY
+          blender --background --python /tmp/build_vitruvian.py > /tmp/vt-blender.log 2>&1 || true
+          tail -n 260 /tmp/vt-blender.log
+          test -f /tmp/vt-build-ok
+          test -s character-lab/vitruvian-eastasian-male-preview.png
+      - name: Upload character lab
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: vitruvian-eastasian-character-lab
+          path: |
+            character-lab/
+            /tmp/vt-blender.log
+            /tmp/vt-build-summary.txt
+            /tmp/vt-blender-version.txt
+            /tmp/vt-source-size.txt
+          if-no-files-found: ignore
