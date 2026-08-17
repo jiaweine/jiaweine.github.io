@@ -1,0 +1,75 @@
+name: Inspect Vitruvian Eye Hair
+
+on:
+  push:
+    branches:
+      - agent/high-fidelity-3d-redesign-v2
+    paths:
+      - .github/workflows/inspect-vt-eyehair.yml
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: moguri/setup-blender@v1
+        with:
+          blender-version: '4.3'
+      - name: Restore cached character source
+        uses: actions/cache@v4
+        with:
+          path: |
+            /tmp/CharMorph
+            /tmp/vitruvian
+          key: vitruvian-charmorph-20260818-v1
+      - name: Mount CharMorph addon
+        run: |
+          BLENDER_ADDONS="$HOME/.config/blender/4.3/scripts/addons"
+          mkdir -p "$BLENDER_ADDONS"
+          rm -rf "$BLENDER_ADDONS/CharMorph"
+          ln -s /tmp/CharMorph "$BLENDER_ADDONS/CharMorph"
+          test -f /tmp/CharMorph/data/characters/vitruvian/config.yaml
+      - name: Inspect generated scene objects
+        run: |
+          cat > /tmp/inspect_eye_hair.py <<'PY'
+          import bpy
+          bpy.ops.wm.read_factory_settings(use_empty=True)
+          bpy.ops.preferences.addon_enable(module='CharMorph')
+          from CharMorph.lib.charlib import library
+          library.load()
+          ui=bpy.context.window_manager.charmorph_ui
+          ui.base_model=[k for k in library.chars if 'vitruv' in k.lower()][0]
+          if hasattr(ui,'use_sk'):ui.use_sk=False
+          if hasattr(ui,'import_morphs'):ui.import_morphs=False
+          if hasattr(ui,'import_expressions'):ui.import_expressions=False
+          bpy.ops.charmorph.import_char()
+          lines=[]
+          for o in bpy.context.scene.objects:
+              mats=[]
+              if getattr(o,'data',None) and hasattr(o.data,'materials'):
+                  mats=[m.name if m else None for m in o.data.materials]
+              lines.append(f'OBJECT name={o.name!r} type={o.type} data={getattr(getattr(o,"data",None),"name",None)!r} parent={getattr(o.parent,"name",None)!r} mats={mats} modifiers={[m.type+":"+m.name for m in o.modifiers]}')
+              if o.type in {'CURVES','CURVE'}:
+                  lines.append(f'  CURVE attrs={[a.name for a in getattr(o.data,"attributes",[])]} points={getattr(o.data,"points_num",None)} curves={getattr(o.data,"curves_num",None)}')
+          obj=bpy.context.active_object
+          if obj and obj.type=='MESH':
+              lines.append('ACTIVE_MATERIAL_FACE_COUNTS')
+              for i,slot in enumerate(obj.material_slots):
+                  count=sum(1 for p in obj.data.polygons if p.material_index==i)
+                  lines.append(f'  slot={i} mat={getattr(slot.material,"name",None)!r} faces={count}')
+          text='\n'.join(lines)
+          print(text,flush=True)
+          open('vitruvian-eye-hair-objects.txt','w').write(text)
+          PY
+          blender --background --python /tmp/inspect_eye_hair.py > /tmp/inspect-eyehair.log 2>&1
+          cat /tmp/inspect-eyehair.log
+          test -s vitruvian-eye-hair-objects.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vitruvian-eye-hair-objects
+          path: |
+            vitruvian-eye-hair-objects.txt
+            /tmp/inspect-eyehair.log
