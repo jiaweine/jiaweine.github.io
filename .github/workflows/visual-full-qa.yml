@@ -35,7 +35,7 @@ jobs:
           npm install --silent puppeteer-core@24
           CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
           export CHROME
-          cat > /tmp/full-qa.mjs <<'JS'
+          cat > ./full-qa.mjs <<'JS'
           import puppeteer from 'puppeteer-core';
           const browser=await puppeteer.launch({
             executablePath:process.env.CHROME,
@@ -66,7 +66,8 @@ jobs:
           await shot('#focus','qa-mobile-focus.png');
           await browser.close();
           JS
-          node /tmp/full-qa.mjs 2>&1 | tee browser-full.log
+          node ./full-qa.mjs 2>&1 | tee browser-full.log
+          rm -f ./full-qa.mjs
           test -s qa-focus.png && test -s qa-work.png && test -s qa-stack.png && test -s qa-mobile-focus.png
       - uses: actions/upload-artifact@v4
         with:
