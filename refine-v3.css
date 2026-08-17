@@ -10,38 +10,46 @@
   filter:none;
   pointer-events:none;
 }
-.hero-stage:before{
-  box-shadow:inset 0 -90px 120px rgba(0,0,0,.08);
-}
-/* Keep the WebGL portrait inside the same physical frame as the stage chrome.
-   The old negative inset let shoulders/body visibly spill below the inner border. */
-.avatar3d{
-  inset:4.5% 5.5% 7%;
-  overflow:hidden;
-  contain:paint;
-}
+.hero-stage:before{box-shadow:inset 0 -90px 120px rgba(0,0,0,.08)}
+.avatar3d{inset:4.5% 5.5% 7%;overflow:hidden;contain:paint}
 .avatar3d canvas{width:100%!important;height:100%!important}
-/* Deep-linked sections must never depend on IntersectionObserver timing to become readable. */
-section:target .reveal,
-section:target.reveal{
-  opacity:1!important;
-  transform:none!important;
-  filter:none!important;
-  transition-delay:0ms!important;
-}
+section:target .reveal,section:target.reveal{opacity:1!important;transform:none!important;filter:none!important;transition-delay:0ms!important}
+
 .hero-copy{transform:translateY(-1.5%)}
 .display{max-width:720px}
 .hero-summary{max-width:570px}
 .hero-focusbar{background:rgba(11,13,12,.42);backdrop-filter:blur(8px)}
+
+/* Real screenshot QA showed the secondary information was too close to disappearing.
+   Keep the editorial hierarchy, but raise body copy one contrast step. */
+.section-head>p,
+.focus-row>p,
+.project-copy p,
+.project-facts,
+.stack-row p{color:#9ba29c}
+.row-tags span{color:#858d87;border-bottom-color:rgba(243,242,237,.18)}
+.project-facts{gap:8px}
+
+/* Slightly reduce dead air without turning the page into a dense dashboard. */
+.focus-layout{grid-template-columns:3.65fr 8.35fr;margin-top:58px}
+.focus-aside{height:330px}
+.projects,.stack-table{margin-top:58px}
+.stack{padding-bottom:92px}
+
 .project-copy h3{transition:letter-spacing .35s var(--ease),transform .35s var(--ease)}
 .project:hover .project-copy h3{letter-spacing:-.045em;transform:translateX(3px)}
 .footer small{max-width:560px}
+
 @media(max-width:1040px){
   .hero-copy{transform:none}
   .hero-stage:after{left:8%;right:8%;bottom:9%;height:38%}
   .avatar3d{inset:4.5% 8% 9%}
+  .focus-layout{margin-top:50px}
 }
 @media(max-width:640px){
   .hero-stage:after{left:9%;right:9%;bottom:10%;height:40%;background:linear-gradient(to top,rgba(11,13,12,1) 0%,rgba(11,13,12,.9) 18%,rgba(11,13,12,.42) 52%,rgba(11,13,12,0) 100%)}
   .avatar3d{inset:4.5% 9% 10%}
+  .focus-layout{margin-top:40px}
+  .projects,.stack-table{margin-top:44px}
+  .stack{padding-bottom:76px}
 }
