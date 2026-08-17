@@ -25,8 +25,6 @@
       observer.observe(el);
     });
 
-    // Browsers may resolve the initial hash after observers are registered.
-    // Reveal the linked section explicitly so direct /#focus-style URLs never open on an all-transparent viewport.
     requestAnimationFrame(() => requestAnimationFrame(revealAnchorTarget));
     addEventListener('hashchange', () => requestAnimationFrame(revealAnchorTarget), { passive: true });
   } else {
@@ -34,20 +32,33 @@
   }
 
   const topbar = document.querySelector('.topbar');
-  const updateTopbar = () => topbar?.classList.toggle('scrolled', scrollY > 28);
-  updateTopbar();
-  addEventListener('scroll', updateTopbar, { passive: true });
-
   const sections = [...document.querySelectorAll('section[id]')];
   const navLinks = [...document.querySelectorAll('.nav a[href^="#"]')];
-  if ('IntersectionObserver' in window) {
-    const navObserver = new IntersectionObserver((entries) => {
-      const active = entries.filter((entry) => entry.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-      if (!active) return;
-      navLinks.forEach((link) => link.classList.toggle('active', link.getAttribute('href') === `#${active.target.id}`));
-    }, { rootMargin: '-22% 0px -62%', threshold: [0, .15, .35] });
-    sections.forEach((section) => navObserver.observe(section));
-  }
+  let ticking = false;
+
+  const updateChrome = () => {
+    topbar?.classList.toggle('scrolled', scrollY > 28);
+    if (sections.length && navLinks.length) {
+      const probe = innerHeight * .32;
+      let current = sections[0];
+      sections.forEach((section) => {
+        if (section.getBoundingClientRect().top <= probe) current = section;
+      });
+      navLinks.forEach((link) => {
+        link.classList.toggle('active', link.getAttribute('href') === `#${current.id}`);
+      });
+    }
+    ticking = false;
+  };
+
+  const requestChromeUpdate = () => {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(updateChrome);
+  };
+  updateChrome();
+  addEventListener('scroll', requestChromeUpdate, { passive: true });
+  addEventListener('resize', requestChromeUpdate, { passive: true });
 
   if (!reduceMotion && matchMedia('(pointer:fine)').matches) {
     document.querySelectorAll('.project').forEach((project) => {
