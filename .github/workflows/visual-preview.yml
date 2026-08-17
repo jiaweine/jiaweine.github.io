@@ -17,23 +17,27 @@ jobs:
         run: |
           python3 -m http.server 4173 >/tmp/portfolio-server.log 2>&1 &
           sleep 2
-      - name: Capture desktop and mobile
+      - name: Capture hero and key sections
         run: |
           CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
-          echo "Using $CHROME"
           FLAGS="--headless=new --no-sandbox --enable-webgl --ignore-gpu-blocklist --use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader --disable-dev-shm-usage"
-          "$CHROME" $FLAGS --window-size=1440,1100 --virtual-time-budget=14000 --screenshot=preview-desktop.png http://127.0.0.1:4173/ 2>chrome-desktop.log
-          "$CHROME" $FLAGS --window-size=390,844 --virtual-time-budget=14000 --screenshot=preview-mobile.png http://127.0.0.1:4173/ 2>chrome-mobile.log
-          curl -L --fail --retry 2 https://raw.githubusercontent.com/ibrews/VitruvianGodot/main/docs/vitruvian_head.png -o reference-vitruvian-head.png
-          test -s preview-desktop.png
-          test -s preview-mobile.png
-          test -s reference-vitruvian-head.png
+          capture () {
+            local size="$1" file="$2" url="$3"
+            "$CHROME" $FLAGS --window-size="$size" --virtual-time-budget=11000 --screenshot="$file" "$url" 2>>chrome.log
+            test -s "$file"
+          }
+          capture 1440,1100 preview-desktop.png http://127.0.0.1:4173/
+          capture 390,844 preview-mobile.png http://127.0.0.1:4173/
+          capture 1440,1100 preview-focus.png http://127.0.0.1:4173/#focus
+          capture 1440,1100 preview-work.png http://127.0.0.1:4173/#work
+          capture 1440,1100 preview-stack.png http://127.0.0.1:4173/#stack
       - uses: actions/upload-artifact@v4
         with:
           name: visual-preview
           path: |
             preview-desktop.png
             preview-mobile.png
-            reference-vitruvian-head.png
-            chrome-desktop.log
-            chrome-mobile.log
+            preview-focus.png
+            preview-work.png
+            preview-stack.png
+            chrome.log
