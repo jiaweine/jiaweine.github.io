@@ -116,8 +116,13 @@ async function init(){
   }
   resize();new ResizeObserver(resize).observe(mount);fallback?.classList.add('hidden');
 
-  let last=performance.now();
+  let last=performance.now(),raf=0,isVisible=true;
+  const schedule=()=>{
+    if(raf||!isVisible||document.hidden)return;
+    raf=requestAnimationFrame(render);
+  };
   function render(now){
+    raf=0;
     const dt=Math.min(.04,(now-last)/1000);last=now;
     pointer.x+=(pointer.tx-pointer.x)*Math.min(1,dt*5);pointer.y+=(pointer.ty-pointer.y)*Math.min(1,dt*5);scroll.value+=(scroll.target-scroll.value)*Math.min(1,dt*3.1);
     if(!reduceMotion){
@@ -126,9 +131,19 @@ async function init(){
       if(neckBone&&neckBase){euler.set(-.005-pointer.y*.006,.012+pointer.x*.012,0,'YXZ');q.setFromEuler(euler).premultiply(neckBase);neckBone.quaternion.slerp(q,Math.min(1,dt*4))}
       camera.position.y=2.08-scroll.value*.065;camera.position.x=.12+scroll.value*.04;camera.lookAt(.13,2.18-scroll.value*.045,0);
     }else camera.lookAt(.13,2.18,0);
-    renderer.render(scene,camera);requestAnimationFrame(render);
+    renderer.render(scene,camera);
+    schedule();
   }
-  requestAnimationFrame(render);
+
+  if('IntersectionObserver'in window){
+    new IntersectionObserver(([entry])=>{
+      isVisible=entry.isIntersecting;
+      if(isVisible){last=performance.now();schedule()}
+    },{rootMargin:'120px 0px'}).observe(mount);
+  }
+  addEventListener('visibilitychange',()=>{if(!document.hidden){last=performance.now();schedule()}},{passive:true});
+  renderer.render(scene,camera);
+  schedule();
 }
 
 init().catch(error=>{console.warn('Rocketbox portrait unavailable',error);fallback?.querySelector('strong')?.replaceChildren(document.createTextNode('Realtime portrait unavailable'))});
