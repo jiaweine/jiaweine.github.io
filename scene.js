@@ -38,7 +38,7 @@ function addMesh(parent, geometry, material, position = [0, 0, 0], scale = [1, 1
 
 function makeTube(parent, points, radius, material, segments = 30) {
   const curve = new THREE.CatmullRomCurve3(points.map((p) => new THREE.Vector3(...p)));
-  return addMesh(parent, new THREE.TubeGeometry(curve, segments, radius, 10, false), material);
+  return addMesh(parent, new THREE.TubeGeometry(curve, segments, radius, 8, false), material);
 }
 
 function makeHairAlphaTexture() {
@@ -46,7 +46,7 @@ function makeHairAlphaTexture() {
   canvas.width = 128;
   canvas.height = 512;
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#161616';
+  ctx.fillStyle = '#282828';
   ctx.fillRect(0, 0, canvas.width, canvas.height);
 
   const rand = (seed) => {
@@ -54,19 +54,15 @@ function makeHairAlphaTexture() {
     return x - Math.floor(x);
   };
 
-  for (let i = 0; i < 110; i++) {
-    const x = 4 + rand(i + 1) * 120;
-    const drift = (rand(i + 31) - .5) * 22;
+  for (let i = 0; i < 150; i++) {
+    const x = 3 + rand(i + 1) * 122;
+    const drift = (rand(i + 31) - .5) * 18;
     ctx.beginPath();
     ctx.moveTo(x, -8);
-    ctx.bezierCurveTo(
-      x + drift * .3, 150,
-      x - drift * .25, 330,
-      x + drift, 520
-    );
-    const light = 145 + Math.floor(rand(i + 61) * 100);
-    ctx.strokeStyle = `rgba(${light},${light},${light},${.25 + rand(i + 91) * .65})`;
-    ctx.lineWidth = .45 + rand(i + 121) * 1.15;
+    ctx.bezierCurveTo(x + drift * .25, 150, x - drift * .18, 330, x + drift, 520);
+    const light = 135 + Math.floor(rand(i + 61) * 95);
+    ctx.strokeStyle = `rgba(${light},${light},${light},${.32 + rand(i + 91) * .64})`;
+    ctx.lineWidth = .35 + rand(i + 121) * .9;
     ctx.stroke();
   }
 
@@ -74,11 +70,10 @@ function makeHairAlphaTexture() {
   texture.wrapS = THREE.ClampToEdgeWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   texture.colorSpace = THREE.NoColorSpace;
-  texture.needsUpdate = true;
   return texture;
 }
 
-function makeRibbonGeometry(points, width = .12, segments = 20) {
+function makeRibbonGeometry(points, width = .09, segments = 22) {
   const curve = new THREE.CatmullRomCurve3(points.map((p) => new THREE.Vector3(...p)));
   const vertices = [];
   const normals = [];
@@ -94,16 +89,14 @@ function makeRibbonGeometry(points, width = .12, segments = 20) {
     curve.getTangentAt(Math.min(.999, t), tangent).normalize();
     side.crossVectors(tangent, front).normalize();
     if (side.lengthSq() < .01) side.set(1, 0, 0);
-    const taper = Math.max(.2, Math.sin(Math.PI * (.08 + t * .84)));
+    const taper = Math.max(.16, Math.sin(Math.PI * (.06 + t * .88)));
     const half = width * taper * .5;
-
     vertices.push(
       p.x - side.x * half, p.y - side.y * half, p.z - side.z * half,
       p.x + side.x * half, p.y + side.y * half, p.z + side.z * half
     );
     normals.push(0, 0, 1, 0, 0, 1);
-    uvs.push(0, t * 1.35, 1, t * 1.35);
-
+    uvs.push(0, t * 1.5, 1, t * 1.5);
     if (i < segments) {
       const a = i * 2;
       const b = a + 1;
@@ -141,13 +134,11 @@ function sculptFaceGeometry(geometry) {
     v.fromBufferAttribute(pos, i);
     const ny = (v.y - box.min.y) / Math.max(size.y, 1e-5);
     const front = (v.z - center.z) / Math.max(size.z * .5, 1e-5);
-
-    let xScale = .988;
-    if (ny < .40) xScale *= .93 + ny * .14;
-    if (ny > .50 && ny < .68) xScale *= 1.01;
+    let xScale = .99;
+    if (ny < .40) xScale *= .94 + ny * .12;
+    if (ny > .50 && ny < .68) xScale *= 1.008;
     v.x = center.x + (v.x - center.x) * xScale;
-
-    if (ny < .27 && front > .18) v.z += size.z * .010 * (1 - ny / .27);
+    if (ny < .27 && front > .18) v.z += size.z * .009 * (1 - ny / .27);
     pos.setXYZ(i, v.x, v.y, v.z);
   }
 
@@ -164,12 +155,12 @@ async function init() {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = .92;
+  renderer.toneMappingExposure = .90;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   mount.appendChild(renderer.domElement);
 
   const scene = new THREE.Scene();
-  scene.fog = new THREE.FogExp2(0x0b0d0c, .025);
+  scene.fog = new THREE.FogExp2(0x0b0d0c, .024);
 
   const pmrem = new THREE.PMREMGenerator(renderer);
   const room = new RoomEnvironment();
@@ -178,45 +169,34 @@ async function init() {
   pmrem.dispose();
 
   const camera = new THREE.PerspectiveCamera(27, 1, .1, 100);
-  camera.position.set(.12, 1.48, 6.55);
+  camera.position.set(.10, 1.52, 6.35);
 
   const portrait = new THREE.Group();
-  portrait.position.set(.18, -.51, 0);
-  portrait.rotation.y = -.075;
+  portrait.position.set(.17, -.40, 0);
+  portrait.rotation.y = -.065;
   scene.add(portrait);
 
   const headRig = new THREE.Group();
   portrait.add(headRig);
 
   const hairAlpha = makeHairAlphaTexture();
-  const hairCardMaterial = new THREE.MeshPhysicalMaterial({
-    color: 0x151716,
-    roughness: .38,
-    metalness: .02,
+  const hairCardMaterial = new THREE.MeshStandardMaterial({
+    color: 0x090a09,
+    roughness: .72,
     alphaMap: hairAlpha,
     transparent: true,
-    alphaTest: .18,
+    alphaTest: .16,
     side: THREE.DoubleSide,
-    depthWrite: true,
-    clearcoat: .05,
-    clearcoatRoughness: .65,
-    envMapIntensity: .72
+    depthWrite: true
   });
-  const hairScalpMaterial = new THREE.MeshPhysicalMaterial({
-    color: 0x121412,
-    roughness: .42,
-    metalness: .02,
-    clearcoat: .05,
-    clearcoatRoughness: .7,
-    envMapIntensity: .7
-  });
-  const browMaterial = new THREE.MeshStandardMaterial({ color: 0x171815, roughness: .55 });
-  const scleraMaterial = new THREE.MeshPhysicalMaterial({ color: 0xe8e2da, roughness: .3, clearcoat: .36, clearcoatRoughness: .12 });
-  const irisMaterial = new THREE.MeshPhysicalMaterial({ color: 0x34231a, roughness: .18, clearcoat: .8, clearcoatRoughness: .08 });
-  const pupilMaterial = new THREE.MeshBasicMaterial({ color: 0x080807 });
-  const corneaMaterial = new THREE.MeshPhysicalMaterial({ color: 0xffffff, transparent: true, opacity: .10, roughness: .04, transmission: .2, clearcoat: 1, clearcoatRoughness: .02 });
-  const silver = new THREE.MeshPhysicalMaterial({ color: 0xd7dadd, metalness: .98, roughness: .13, clearcoat: .55, clearcoatRoughness: .12, envMapIntensity: 1.45 });
-  const cushionMaterial = new THREE.MeshPhysicalMaterial({ color: 0x202321, metalness: .2, roughness: .35 });
+  const hairScalpMaterial = new THREE.MeshPhysicalMaterial({ color: 0x0c0d0c, roughness: .50, metalness: .01, clearcoat: .025, envMapIntensity: .45 });
+  const browMaterial = new THREE.MeshStandardMaterial({ color: 0x211b18, roughness: .68 });
+  const scleraMaterial = new THREE.MeshPhysicalMaterial({ color: 0xe9e3dc, roughness: .34, clearcoat: .28, clearcoatRoughness: .16 });
+  const irisMaterial = new THREE.MeshPhysicalMaterial({ color: 0x302018, roughness: .20, clearcoat: .72, clearcoatRoughness: .08 });
+  const pupilMaterial = new THREE.MeshBasicMaterial({ color: 0x070706 });
+  const corneaMaterial = new THREE.MeshPhysicalMaterial({ color: 0xffffff, transparent: true, opacity: .07, roughness: .03, clearcoat: 1, clearcoatRoughness: .02 });
+  const silver = new THREE.MeshPhysicalMaterial({ color: 0xd8dbde, metalness: .98, roughness: .14, clearcoat: .48, clearcoatRoughness: .13, envMapIntensity: 1.35 });
+  const cushionMaterial = new THREE.MeshPhysicalMaterial({ color: 0x1b1e1c, metalness: .16, roughness: .40 });
 
   const [gltf, colorMap, normalMap] = await Promise.all([
     loadGLTF(MODEL_URL),
@@ -230,14 +210,14 @@ async function init() {
     color: 0xffffff,
     map: colorMap,
     normalMap: normalMap,
-    normalScale: new THREE.Vector2(.22, .22),
-    roughness: .57,
+    normalScale: new THREE.Vector2(.19, .19),
+    roughness: .60,
     metalness: 0,
-    clearcoat: .025,
-    clearcoatRoughness: .86,
-    sheen: .025,
-    sheenColor: new THREE.Color(0xffd5c4),
-    envMapIntensity: .70
+    clearcoat: .015,
+    clearcoatRoughness: .90,
+    sheen: .015,
+    sheenColor: new THREE.Color(0xffd8ca),
+    envMapIntensity: .64
   });
 
   const scan = gltf.scene.clone(true);
@@ -263,61 +243,58 @@ async function init() {
   scan.position.z -= scaledCenter.z + .03;
   headRig.add(scan);
 
-  // The scan has open eye sockets. Fill them with actual eyeballs instead of hiding them with geometry.
+  // Smaller eyes sit deeper in the real scan sockets, so they read as human rather than cartoon spheres.
   const eyes = [];
   for (const side of [-1, 1]) {
     const eyeRig = new THREE.Group();
-    eyeRig.position.set(side * .255, 2.49, .645);
+    eyeRig.position.set(side * .258, 2.475, .606);
     headRig.add(eyeRig);
-
-    addMesh(eyeRig, new THREE.SphereGeometry(.122, 40, 28), scleraMaterial, [0, 0, 0], [1, .82, .9]);
-    const iris = addMesh(eyeRig, new THREE.SphereGeometry(.052, 30, 22), irisMaterial, [0, 0, .105], [1, .92, .38]);
-    addMesh(eyeRig, new THREE.SphereGeometry(.022, 24, 18), pupilMaterial, [0, 0, .126], [1, 1, .35]);
-    addMesh(eyeRig, new THREE.SphereGeometry(.124, 40, 28), corneaMaterial, [0, 0, .006], [1, .82, .9]);
-    eyes.push({ rig: eyeRig, iris, side });
+    addMesh(eyeRig, new THREE.SphereGeometry(.086, 40, 28), scleraMaterial, [0, 0, 0], [1.14, .78, .92]);
+    addMesh(eyeRig, new THREE.SphereGeometry(.034, 30, 22), irisMaterial, [0, 0, .075], [1, .92, .38]);
+    addMesh(eyeRig, new THREE.SphereGeometry(.014, 24, 18), pupilMaterial, [0, 0, .088], [1, 1, .35]);
+    addMesh(eyeRig, new THREE.SphereGeometry(.089, 40, 28), corneaMaterial, [0, 0, .003], [1.14, .78, .92]);
+    eyes.push({ rig: eyeRig, side });
   }
 
-  // Subtle sword brows. Keep them thin and above the sockets; no fake lower eyelid lines.
-  makeTube(headRig, [[-.10,2.66,.724],[-.23,2.685,.755],[-.36,2.71,.735],[-.47,2.715,.675]], .012, browMaterial, 28);
-  makeTube(headRig, [[.10,2.66,.724],[.23,2.685,.755],[.36,2.71,.735],[.47,2.715,.675]], .012, browMaterial, 28);
+  // The scan already carries natural brows. Only reinforce the outer sword-like direction, very lightly.
+  makeTube(headRig, [[-.15,2.615,.706],[-.27,2.635,.732],[-.38,2.655,.704],[-.45,2.66,.662]], .006, browMaterial, 24);
+  makeTube(headRig, [[.15,2.615,.706],[.27,2.635,.732],[.38,2.655,.704],[.45,2.66,.662]], .006, browMaterial, 24);
 
-  // Compact scalp base. Hair cards provide the silhouette and strand breakup.
-  const scalp = addMesh(headRig, new THREE.SphereGeometry(.72, 72, 44, 0, Math.PI * 2, 0, Math.PI * .52), hairScalpMaterial, [0, 2.55, -.04], [.90, .56, .79]);
-  scalp.rotation.x = .025;
+  // A compact dark crown covers the bald scan. Thin cards then create the middle-part silhouette.
+  const scalp = addMesh(headRig, new THREE.SphereGeometry(.77, 80, 52, 0, Math.PI * 2, 0, Math.PI * .52), hairScalpMaterial, [0, 2.535, .075], [.91, .60, .84]);
+  scalp.rotation.x = .015;
 
   const leftCards = [
-    { w:.16, p:[[-.025,2.95,.24],[-.11,2.84,.43],[-.24,2.72,.53],[-.36,2.60,.55],[-.43,2.48,.50]] },
-    { w:.15, p:[[-.06,2.94,.17],[-.18,2.83,.36],[-.31,2.70,.48],[-.43,2.54,.49],[-.50,2.36,.40]] },
-    { w:.14, p:[[-.12,2.91,.10],[-.25,2.80,.27],[-.39,2.66,.36],[-.50,2.49,.34],[-.56,2.29,.24]] },
-    { w:.13, p:[[-.18,2.86,.02],[-.32,2.76,.15],[-.47,2.62,.20],[-.57,2.43,.15],[-.61,2.22,.05]] },
-    { w:.12, p:[[-.23,2.80,-.05],[-.38,2.72,.04],[-.52,2.58,.06],[-.62,2.40,-.01],[-.64,2.20,-.10]] },
-    { w:.11, p:[[-.10,2.92,.30],[-.18,2.80,.50],[-.31,2.64,.61],[-.41,2.48,.62],[-.46,2.33,.55]] },
-    { w:.10, p:[[-.20,2.84,.31],[-.31,2.71,.48],[-.44,2.57,.52],[-.52,2.39,.45],[-.55,2.24,.34]] },
-    { w:.10, p:[[-.30,2.74,.18],[-.41,2.62,.30],[-.52,2.48,.31],[-.60,2.30,.22],[-.61,2.16,.13]] }
+    { w:.105, p:[[-.020,2.985,.28],[-.10,2.89,.44],[-.22,2.78,.53],[-.33,2.66,.54],[-.40,2.54,.48]] },
+    { w:.095, p:[[-.055,2.98,.20],[-.16,2.88,.37],[-.29,2.76,.47],[-.40,2.62,.46],[-.48,2.45,.37]] },
+    { w:.090, p:[[-.105,2.95,.12],[-.22,2.85,.28],[-.35,2.72,.36],[-.47,2.56,.34],[-.54,2.38,.25]] },
+    { w:.085, p:[[-.16,2.90,.04],[-.29,2.81,.17],[-.43,2.67,.22],[-.54,2.51,.17],[-.59,2.32,.08]] },
+    { w:.080, p:[[-.22,2.84,-.02],[-.35,2.76,.08],[-.49,2.63,.10],[-.59,2.47,.04],[-.62,2.29,-.04]] },
+    { w:.080, p:[[-.09,2.97,.34],[-.17,2.86,.49],[-.29,2.72,.58],[-.38,2.57,.58],[-.43,2.44,.51]] },
+    { w:.075, p:[[-.19,2.89,.29],[-.30,2.78,.43],[-.42,2.65,.47],[-.50,2.50,.41],[-.54,2.37,.32]] },
+    { w:.070, p:[[-.29,2.80,.18],[-.40,2.70,.29],[-.51,2.58,.30],[-.58,2.43,.22],[-.59,2.30,.13]] }
   ];
-
   for (const card of leftCards) {
     addHairRibbon(headRig, card.p, card.w, hairCardMaterial);
     addHairRibbon(headRig, card.p.map(([x, y, z]) => [-x, y, z]), card.w, hairCardMaterial);
   }
 
-  // Narrow center seam: clearly middle-parted without a cartoon white scalp stripe.
-  const partMaterial = new THREE.MeshStandardMaterial({ color: 0x5b4034, roughness: .85, transparent: true, opacity: .36 });
-  makeTube(headRig, [[0,2.955,.245],[0,2.875,.35],[0,2.78,.40]], .006, partMaterial, 18);
+  const partMaterial = new THREE.MeshStandardMaterial({ color: 0x6a4b40, roughness: .90, transparent: true, opacity: .28 });
+  makeTube(headRig, [[0,2.99,.29],[0,2.91,.38],[0,2.82,.42]], .004, partMaterial, 18);
 
-  // Silver over-ear headphones resting around the neck, modeled as a U instead of a chest-level torus.
-  makeTube(headRig, [[-.48,1.28,.34],[-.43,1.10,.48],[-.25,.98,.55],[0,.93,.58],[.25,.98,.55],[.43,1.10,.48],[.48,1.28,.34]], .034, silver, 56);
+  // Smaller headphones, lifted onto the neck instead of hanging across the chest.
+  makeTube(headRig, [[-.425,1.39,.34],[-.39,1.25,.45],[-.22,1.13,.52],[0,1.08,.55],[.22,1.13,.52],[.39,1.25,.45],[.425,1.39,.34]], .025, silver, 52);
   for (const side of [-1, 1]) {
-    const cup = addMesh(headRig, new THREE.CylinderGeometry(.12, .12, .085, 40), silver, [side * .49, 1.28, .36]);
+    const cup = addMesh(headRig, new THREE.CylinderGeometry(.095, .095, .070, 40), silver, [side * .435, 1.39, .355]);
     cup.rotation.z = Math.PI / 2;
-    cup.rotation.y = side * .18;
-    const cushion = addMesh(headRig, new THREE.CylinderGeometry(.098, .098, .09, 40), cushionMaterial, [side * .49, 1.28, .36], [.94, 1, .94]);
+    cup.rotation.y = side * .15;
+    const cushion = addMesh(headRig, new THREE.CylinderGeometry(.077, .077, .075, 40), cushionMaterial, [side * .435, 1.39, .355], [.94, 1, .94]);
     cushion.rotation.z = Math.PI / 2;
-    cushion.rotation.y = side * .18;
+    cushion.rotation.y = side * .15;
   }
 
-  scene.add(new THREE.HemisphereLight(0xf1eae3, 0x111512, .92));
-  const key = new THREE.DirectionalLight(0xffddcf, 2.75);
+  scene.add(new THREE.HemisphereLight(0xf1eae3, 0x111512, .88));
+  const key = new THREE.DirectionalLight(0xffddcf, 2.55);
   key.position.set(-3.6, 5.8, 5.3);
   key.castShadow = true;
   key.shadow.mapSize.set(2048, 2048);
@@ -326,16 +303,16 @@ async function init() {
   key.shadow.bias = -.0003;
   scene.add(key);
 
-  const fill = new THREE.DirectionalLight(0xe7efed, 1.05);
+  const fill = new THREE.DirectionalLight(0xe7efed, .95);
   fill.position.set(4.8, 2.7, 3.6);
   scene.add(fill);
 
-  const rim = new THREE.DirectionalLight(0xcfe0ff, 1.65);
+  const rim = new THREE.DirectionalLight(0xcfe0ff, 1.55);
   rim.position.set(3.2, 4.4, -4.2);
   scene.add(rim);
 
-  const accent = new THREE.PointLight(0xff744f, 1.45, 7.5, 2);
-  accent.position.set(-2.8, .7, 3.0);
+  const accent = new THREE.PointLight(0xff744f, 1.25, 7.5, 2);
+  accent.position.set(-2.8, .8, 3.0);
   scene.add(accent);
 
   const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
@@ -367,17 +344,17 @@ async function init() {
     camera.updateProjectionMatrix();
 
     if (width < 560) {
-      portrait.scale.setScalar(.88);
-      portrait.position.set(.31, -.45, 0);
-      camera.position.set(.08, 1.54, 7.05);
+      portrait.scale.setScalar(.91);
+      portrait.position.set(.28, -.34, 0);
+      camera.position.set(.07, 1.56, 6.90);
     } else if (width < 850) {
-      portrait.scale.setScalar(.95);
-      portrait.position.set(.25, -.49, 0);
-      camera.position.set(.10, 1.50, 6.75);
+      portrait.scale.setScalar(.97);
+      portrait.position.set(.23, -.38, 0);
+      camera.position.set(.09, 1.54, 6.58);
     } else {
       portrait.scale.setScalar(1);
-      portrait.position.set(.18, -.51, 0);
-      camera.position.set(.12, 1.48, 6.55);
+      portrait.position.set(.17, -.40, 0);
+      camera.position.set(.10, 1.52, 6.35);
     }
   }
 
@@ -390,28 +367,25 @@ async function init() {
     const dt = Math.min(.04, (now - last) / 1000);
     last = now;
     const t = now * .001;
-
     pointer.x += (pointer.tx - pointer.x) * Math.min(1, dt * 5.2);
     pointer.y += (pointer.ty - pointer.y) * Math.min(1, dt * 5.2);
     scrollState.value += (scrollState.target - scrollState.value) * Math.min(1, dt * 3.2);
 
     if (!reduceMotion) {
-      portrait.rotation.y = -.075 + pointer.x * .04 + scrollState.value * .09;
-      portrait.rotation.x = pointer.y * .012 - scrollState.value * .01;
-      headRig.rotation.y = pointer.x * .055;
-      headRig.rotation.x = -pointer.y * .026;
-      headRig.position.y = Math.sin(t * 1.14) * .0045;
-
+      portrait.rotation.y = -.065 + pointer.x * .038 + scrollState.value * .085;
+      portrait.rotation.x = pointer.y * .010 - scrollState.value * .009;
+      headRig.rotation.y = pointer.x * .050;
+      headRig.rotation.x = -pointer.y * .022;
+      headRig.position.y = Math.sin(t * 1.12) * .004;
       eyes.forEach(({ rig, side }) => {
-        rig.rotation.y = pointer.x * .075 + side * .01;
-        rig.rotation.x = -pointer.y * .05;
+        rig.rotation.y = pointer.x * .055 + side * .008;
+        rig.rotation.x = -pointer.y * .035;
       });
-
-      camera.position.y = 1.48 - scrollState.value * .09;
-      camera.position.x = .12 + scrollState.value * .07;
-      camera.lookAt(.12, 1.66 - scrollState.value * .07, 0);
+      camera.position.y = 1.52 - scrollState.value * .08;
+      camera.position.x = .10 + scrollState.value * .06;
+      camera.lookAt(.10, 1.72 - scrollState.value * .06, 0);
     } else {
-      camera.lookAt(.12, 1.66, 0);
+      camera.lookAt(.10, 1.72, 0);
     }
 
     renderer.render(scene, camera);
