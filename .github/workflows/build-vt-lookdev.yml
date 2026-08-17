@@ -75,98 +75,113 @@ jobs:
               bpy.ops.preferences.addon_enable(module='CharMorph')
               from CharMorph.lib.charlib import library
               from CharMorph.common import manager as mm
-              library.load();ui=bpy.context.window_manager.charmorph_ui
+              library.load(); ui=bpy.context.window_manager.charmorph_ui
               ui.base_model=[k for k in library.chars if 'vitruv' in k.lower()][0]
-              if hasattr(ui,'use_sk'):ui.use_sk=False
-              if hasattr(ui,'import_morphs'):ui.import_morphs=False
-              if hasattr(ui,'import_expressions'):ui.import_expressions=False
+              if hasattr(ui,'use_sk'): ui.use_sk=False
+              if hasattr(ui,'import_morphs'): ui.import_morphs=False
+              if hasattr(ui,'import_expressions'): ui.import_expressions=False
               bpy.ops.charmorph.import_char()
               obj=bpy.context.active_object
-              if not mm.morpher or not obj:raise RuntimeError('Character import failed')
-              return mm.morpher,obj,ui,library
+              if not mm.morpher or not obj: raise RuntimeError('Character import failed')
+              return mm.morpher,obj,ui
 
           def replace_skin(obj):
-              skin=bpy.data.materials.new('LookdevSkin')
-              skin.use_nodes=True
+              skin=bpy.data.materials.new('LookdevSkin'); skin.use_nodes=True
               bsdf=skin.node_tree.nodes.get('Principled BSDF')
-              bsdf.inputs['Base Color'].default_value=(0.38,0.205,0.135,1)
+              bsdf.inputs['Base Color'].default_value=(0.34,0.17,0.105,1)
               bsdf.inputs['Roughness'].default_value=.50
-              if 'Subsurface Weight' in bsdf.inputs:bsdf.inputs['Subsurface Weight'].default_value=.065
+              if 'Subsurface Weight' in bsdf.inputs: bsdf.inputs['Subsurface Weight'].default_value=.06
               for i,slot in enumerate(obj.material_slots):
-                  if slot.material and slot.material.name.startswith('UDIM.Skin'):
-                      obj.data.materials[i]=skin
-              return skin
+                  if slot.material and slot.material.name.startswith('UDIM.Skin'): obj.data.materials[i]=skin
 
-          def hide_source_eye_hair(obj):
-              # The source brows/lashes read as makeup in the default material. Hide that source slot;
-              # fitted standalone eyebrows are added below.
-              for slot in obj.material_slots:
-                  if slot.material and slot.material.name.startswith('EyeHair'):
-                      m=slot.material;m.use_nodes=True
-                      for n in list(m.node_tree.nodes):m.node_tree.nodes.remove(n)
-                      out=m.node_tree.nodes.new('ShaderNodeOutputMaterial')
-                      trans=m.node_tree.nodes.new('ShaderNodeBsdfTransparent')
-                      m.node_tree.links.new(trans.outputs[0],out.inputs[0])
+          def style_particle_material(mat, melanin=.96, rough=.36):
+              if not mat: return
+              mat.use_nodes=True; mat.node_tree.nodes.clear()
+              out=mat.node_tree.nodes.new('ShaderNodeOutputMaterial')
+              hair=mat.node_tree.nodes.new('ShaderNodeBsdfHairPrincipled')
+              hair.parametrization='MELANIN'
+              hair.inputs['Melanin'].default_value=melanin
+              hair.inputs['Melanin Redness'].default_value=.04
+              hair.inputs['Roughness'].default_value=rough
+              mat.node_tree.links.new(hair.outputs[0],out.inputs[0])
+              mat.diffuse_color=(.008,.009,.010,1)
 
-          def fit_asset(ui,obj,key):
-              ui.fitting_char=obj
-              ui.fitting_library_asset='char_'+key
-              before=set(bpy.context.scene.objects)
-              res=bpy.ops.charmorph.fit_library()
-              added=[o for o in bpy.context.scene.objects if o not in before]
-              print('FIT',key,res,[(o.name,o.type) for o in added],flush=True)
-              return added
+          def disable_lashes_keep_brows(obj):
+              for mod in obj.modifiers:
+                  if mod.type!='PARTICLE_SYSTEM': continue
+                  if mod.name=='Eyelashes':
+                      mod.show_render=False; mod.show_viewport=False
+                      print('DISABLED',mod.name,flush=True)
+                  elif mod.name.startswith('mind_eyebrows'):
+                      ps=mod.particle_system
+                      slot=ps.settings.material
+                      mat=obj.data.materials[slot-1] if 0 < slot <= len(obj.data.materials) else None
+                      style_particle_material(mat,.92,.47)
+                      print('KEPT_BROWS',mod.name,'material',getattr(mat,'name',None),flush=True)
 
-          def style_asset(objs,kind):
-              for o in objs:
-                  if o.type!='MESH':continue
-                  mat=bpy.data.materials.new(f'{kind}_{o.name}')
-                  mat.use_nodes=True;bsdf=mat.node_tree.nodes.get('Principled BSDF')
-                  if kind=='hair':
-                      bsdf.inputs['Base Color'].default_value=(0.008,0.010,0.011,1);bsdf.inputs['Roughness'].default_value=.43
-                  else:
-                      bsdf.inputs['Base Color'].default_value=(0.012,0.013,0.013,1);bsdf.inputs['Roughness'].default_value=.58
-                  o.data.materials.clear();o.data.materials.append(mat)
+          def apply_variant(m,data):
+              m.set_L1('Default',False)
+              m.apply_morph_data({'type':['Default'],'morphs':data,'materials':{},'meta':{}},False)
+              bpy.context.view_layer.update()
+
+          def create_hair(ui,obj,style='Combover_zoro_d'):
+              bpy.context.view_layer.objects.active=obj; obj.select_set(True)
+              ui.hair_style=style
+              ui.hair_scalp=False
+              ui.hair_shrinkwrap=True
+              print('HAIR_STYLE',ui.hair_style,flush=True)
+              result=bpy.ops.charmorph.hair_create()
+              print('HAIR_CREATE',result,[(m.name,m.type) for m in obj.modifiers if m.type=='PARTICLE_SYSTEM'],flush=True)
+              if result!={'FINISHED'}: raise RuntimeError('hair_create failed')
+              for mod in obj.modifiers:
+                  if mod.type!='PARTICLE_SYSTEM' or mod.name in {'Eyelashes'} or mod.name.startswith('mind_eyebrows'): continue
+                  ps=mod.particle_system; slot=ps.settings.material
+                  mat=obj.data.materials[slot-1] if 0 < slot <= len(obj.data.materials) else None
+                  style_particle_material(mat,.99,.31)
+              return result
+
+          def refit_hair(obj):
+              bpy.context.view_layer.objects.active=obj; obj.select_set(True)
+              result=bpy.ops.charmorph.hair_refit()
+              print('HAIR_REFIT',result,flush=True)
 
           def clear_render_rig():
               for o in list(bpy.context.scene.objects):
-                  if o.type in {'LIGHT','CAMERA'}:bpy.data.objects.remove(o,do_unlink=True)
+                  if o.type in {'LIGHT','CAMERA'}: bpy.data.objects.remove(o,do_unlink=True)
 
           def render(obj,name):
               clear_render_rig()
               coords=[obj.matrix_world@Vector(c) for c in obj.bound_box]
               minv=Vector((min(p.x for p in coords),min(p.y for p in coords),min(p.z for p in coords)))
               maxv=Vector((max(p.x for p in coords),max(p.y for p in coords),max(p.z for p in coords)))
-              h=maxv.z-minv.z;target=Vector(((minv.x+maxv.x)/2,(minv.y+maxv.y)/2,maxv.z-h*.105))
-              if not bpy.context.scene.world:bpy.context.scene.world=bpy.data.worlds.new('World')
-              w=bpy.context.scene.world;w.use_nodes=True;bg=w.node_tree.nodes['Background'];bg.inputs['Color'].default_value=(.004,.005,.005,1);bg.inputs['Strength'].default_value=.055
+              h=maxv.z-minv.z; target=Vector(((minv.x+maxv.x)/2,(minv.y+maxv.y)/2,maxv.z-h*.105))
+              if not bpy.context.scene.world: bpy.context.scene.world=bpy.data.worlds.new('World')
+              w=bpy.context.scene.world; w.use_nodes=True; bg=w.node_tree.nodes['Background']; bg.inputs['Color'].default_value=(.004,.005,.005,1); bg.inputs['Strength'].default_value=.055
               def area(label,loc,energy,size,color):
-                  d=bpy.data.lights.new(label,'AREA');d.energy=energy;d.shape='DISK';d.size=size;d.color=color
-                  o=bpy.data.objects.new(label,d);bpy.context.collection.objects.link(o);o.location=loc;o.rotation_euler=(target-o.location).to_track_quat('-Z','Y').to_euler()
+                  d=bpy.data.lights.new(label,'AREA'); d.energy=energy; d.shape='DISK'; d.size=size; d.color=color
+                  o=bpy.data.objects.new(label,d); bpy.context.collection.objects.link(o); o.location=loc; o.rotation_euler=(target-o.location).to_track_quat('-Z','Y').to_euler()
               area('Key',(target.x-1.0,target.y-1.55,target.z+.95),320,2.15,(1,.87,.80))
               area('Fill',(target.x+1.3,target.y-1.0,target.z+.35),115,2.7,(.72,.82,1))
               area('Rim',(target.x+.95,target.y+1.1,target.z+.85),245,2.0,(.62,.76,1))
-              cd=bpy.data.cameras.new('Camera');cam=bpy.data.objects.new('Camera',cd);bpy.context.collection.objects.link(cam);bpy.context.scene.camera=cam
-              cam.location=(target.x+.12,target.y-.76,target.z+.02);cam.rotation_euler=(target-cam.location).to_track_quat('-Z','Y').to_euler();cd.lens=88
-              s=bpy.context.scene;s.render.engine='BLENDER_EEVEE_NEXT';s.render.resolution_x=620;s.render.resolution_y=620;s.render.resolution_percentage=100
-              s.render.image_settings.file_format='PNG';s.render.filepath=os.path.join(OUT,name+'.png');s.view_settings.look='AgX - Medium High Contrast'
-              bpy.ops.render.render(write_still=True);print('WROTE',s.render.filepath,os.path.getsize(s.render.filepath),flush=True)
+              cd=bpy.data.cameras.new('Camera'); cam=bpy.data.objects.new('Camera',cd); bpy.context.collection.objects.link(cam); bpy.context.scene.camera=cam
+              cam.location=(target.x+.12,target.y-.76,target.z+.02); cam.rotation_euler=(target-cam.location).to_track_quat('-Z','Y').to_euler(); cd.lens=88
+              s=bpy.context.scene; s.render.engine='BLENDER_EEVEE_NEXT'; s.render.resolution_x=620; s.render.resolution_y=620; s.render.resolution_percentage=100
+              s.render.image_settings.file_format='PNG'; s.render.filepath=os.path.join(OUT,name+'.png'); s.view_settings.look='AgX - Medium High Contrast'
+              bpy.ops.render.render(write_still=True); print('WROTE',s.render.filepath,os.path.getsize(s.render.filepath),flush=True)
 
           try:
-              m,obj,ui,library=setup()
-              replace_skin(obj);hide_source_eye_hair(obj)
-              hair=fit_asset(ui,obj,'Combover_zoro_d');style_asset(hair,'hair')
-              brows=fit_asset(ui,obj,'mind_eyebrows_11_Default');style_asset(brows,'brow')
-              for name,delta in VARIANTS.items():
-                  data=dict(BASE);data.update(delta)
-                  m.set_L1('Default',False);m.apply_morph_data({'type':['Default'],'morphs':data,'materials':{},'meta':{}},False)
-                  if m.fitter:m.fitter.clear_cache();m.fitter.refit_all()
-                  bpy.context.view_layer.update();render(obj,name)
+              m,obj,ui=setup(); replace_skin(obj); disable_lashes_keep_brows(obj)
+              names=list(VARIANTS.items())
+              first_name,first_delta=names[0]; data=dict(BASE);data.update(first_delta);apply_variant(m,data)
+              create_hair(ui,obj,'Combover_zoro_d'); render(obj,first_name)
+              for name,delta in names[1:]:
+                  data=dict(BASE);data.update(delta);apply_variant(m,data);refit_hair(obj);render(obj,name)
               open('/tmp/lookdev-ok','w').write('ok')
-          except Exception:traceback.print_exc();raise
+          except Exception:
+              traceback.print_exc(); raise
           PY
           blender --background --python /tmp/render_lookdev.py > /tmp/vt-lookdev.log 2>&1 || true
-          tail -n 260 /tmp/vt-lookdev.log
+          tail -n 300 /tmp/vt-lookdev.log
           test -f /tmp/lookdev-ok
           test -s character-lab/vitruvian-lookdev/G_asian_editorial.png
           test -s character-lab/vitruvian-lookdev/H_actor_vline.png
@@ -175,10 +190,10 @@ jobs:
           python3 -m pip install --quiet pillow
           python3 - <<'PY'
           from PIL import Image,ImageDraw
-          root='character-lab/vitruvian-lookdev';names=['G_asian_editorial','H_actor_vline']
-          sheet=Image.new('RGB',(1240,680),(8,9,9));d=ImageDraw.Draw(sheet)
+          root='character-lab/vitruvian-lookdev'; names=['G_asian_editorial','H_actor_vline']
+          sheet=Image.new('RGB',(1240,680),(8,9,9)); d=ImageDraw.Draw(sheet)
           for i,n in enumerate(names):
-              im=Image.open(f'{root}/{n}.png').convert('RGB');sheet.paste(im,(i*620,0));d.rectangle((i*620,620,(i+1)*620,680),fill=(8,9,9));d.text((i*620+20,640),n,fill=(235,238,235))
+              im=Image.open(f'{root}/{n}.png').convert('RGB'); sheet.paste(im,(i*620,0)); d.rectangle((i*620,620,(i+1)*620,680),fill=(8,9,9)); d.text((i*620+20,640),n,fill=(235,238,235))
           sheet.save(f'{root}/contact-sheet.jpg',quality=94)
           PY
       - uses: actions/upload-artifact@v4
