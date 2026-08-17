@@ -52,7 +52,7 @@ async function init(){
   const pmrem=new THREE.PMREMGenerator(renderer),room=new RoomEnvironment();scene.environment=pmrem.fromScene(room,.035).texture;room.dispose();pmrem.dispose();
   const camera=new THREE.PerspectiveCamera(27,1,.1,100);camera.position.set(.12,2.08,5.06);
   const portrait=new THREE.Group();portrait.rotation.y=-.115;scene.add(portrait);
-  const gltf=await loadModel('./assets/rocketbox-male10.glb'),avatar=gltf.scene;portrait.add(avatar);
+  const gltf=await loadModel('./assets/rocketbox-male10-web.glb'),avatar=gltf.scene;portrait.add(avatar);
 
   let headBone=null,neckBone=null;const morphs=[];
   avatar.traverse(o=>{
