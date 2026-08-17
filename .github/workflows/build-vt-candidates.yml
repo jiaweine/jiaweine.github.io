@@ -47,63 +47,49 @@ jobs:
           mkdir -p "$BLENDER_ADDONS"
           cp -a /tmp/CharMorph "$BLENDER_ADDONS/CharMorph"
           blender --version
-      - name: Render A B C face candidates
+      - name: Render D E F face candidates
         run: |
           cat > /tmp/render_candidates.py <<'PY'
           import bpy, os, traceback
           from mathutils import Vector
-          from collections import defaultdict, deque
+          from collections import defaultdict
 
-          OUT=os.path.abspath('character-lab/vitruvian-candidates')
+          OUT=os.path.abspath('character-lab/vitruvian-candidates-v2')
           os.makedirs(OUT,exist_ok=True)
 
           BASE={
-              'Gender_Male':1.0,
-              'Race_EastAsian':1.0,
-              'Race_White':0.0,
-              'Age_Old':0.0,
-              'Age_Baby':0.0,
-              'BodyType_Lean':0.18,
-              'BodyType_MesoMorph':0.26,
-              'Eyes_Eyelid_Monolid':0.78,
-              'Eyes_Eyelid_hooded':0.24,
-              'Eyes_EyelidsCrease':-0.22,
-              'Eyes_EyebrowsDroop':-0.18,
-              'Generic_Assymetry':0.035,
-              'Mouth_Lips_Length':0.05,
-              'Mouth_Lips_UpperLipDepth':-0.22,
-              'Mouth_PhiltrumHeight':-0.08,
-              'Nose_NostrilSize':-0.05,
-              'Nose_Tip_Potrusion':-0.06,
+              'Gender_Male':1.0,'Race_EastAsian':1.0,'Race_White':0.0,'Age_Old':0.0,'Age_Baby':0.0,
+              'BodyType_Lean':0.14,'BodyType_MesoMorph':0.30,
+              'Eyes_Eyelid_Monolid':0.88,'Eyes_Eyelid_hooded':0.30,'Eyes_EyelidsCrease':-0.30,'Eyes_EyebrowsDroop':-0.22,
+              'Generic_Assymetry':0.032,
+              'Mouth_Lips_Length':0.04,'Mouth_Lips_UpperLipDepth':-0.27,'Mouth_PhiltrumHeight':-0.06,
+              'Nose_NostrilSize':-0.04,'Nose_Tip_Potrusion':-0.04,
           }
           VARIANTS={
-              'A_sharp_editorial':{
-                  'Eyes_Size':-0.31,'Eyes_UpperLidOpenness':-0.29,'Eyes_LowerLidOpenness':-0.12,
-                  'Eyes_EyelidsAngle':-0.07,'Eyes_EyelidsAngle2':-0.05,
-                  'Face_BrowRidge_Droop':0.27,'Face_FrontalBone_BrowRidge':0.31,'Face_Zygomatic_Bone':0.30,
-                  'Cheeks_BuccalFat':-0.12,'Cheeks_UpperCheek_Bone':0.32,
-                  'Jaw_Definition':0.68,'Jaw_Mandible':0.36,'Jaw_Mandible_GonialAngle':-0.34,'Jaw_Ramus_LocY':-0.20,'Jaw_Width':0.34,
-                  'Chin_Height':0.09,'Chin_SecondaryWidth':0.22,'Chin_Width':-0.18,'Chin_Portrusion':0.10,
-                  'Nose_BridgeProminence':-0.04,'Nose_NasalAngle':0.18,'Nose_Potrusion':-0.18,
+              'D_handsome_balanced':{
+                  'Eyes_Size':-0.35,'Eyes_UpperLidOpenness':-0.36,'Eyes_LowerLidOpenness':-0.15,'Eyes_EyelidsAngle':-0.06,'Eyes_EyelidsAngle2':-0.04,
+                  'Face_BrowRidge_Droop':0.34,'Face_FrontalBone_BrowRidge':0.40,'Face_Zygomatic_Bone':0.32,
+                  'Cheeks_BuccalFat':-0.16,'Cheeks_UpperCheek_Bone':0.34,
+                  'Jaw_Definition':0.78,'Jaw_Mandible':0.45,'Jaw_Mandible_GonialAngle':0.42,'Jaw_Ramus_LocY':-0.22,'Jaw_Width':0.53,
+                  'Chin_Height':0.13,'Chin_SecondaryWidth':0.27,'Chin_Width':-0.08,'Chin_Portrusion':0.13,
+                  'Nose_BridgeProminence':0.01,'Nose_NasalAngle':0.13,'Nose_Potrusion':-0.15,
               },
-              'B_young_actor':{
-                  'Eyes_Size':-0.24,'Eyes_UpperLidOpenness':-0.23,'Eyes_LowerLidOpenness':-0.09,
-                  'Eyes_EyelidsAngle':-0.04,'Eyes_EyelidsAngle2':-0.035,
-                  'Face_BrowRidge_Droop':0.20,'Face_FrontalBone_BrowRidge':0.22,'Face_Zygomatic_Bone':0.25,
-                  'Cheeks_BuccalFat':-0.05,'Cheeks_UpperCheek_Bone':0.27,
-                  'Jaw_Definition':0.55,'Jaw_Mandible':0.28,'Jaw_Mandible_GonialAngle':-0.27,'Jaw_Ramus_LocY':-0.18,'Jaw_Width':0.27,
-                  'Chin_Height':0.03,'Chin_SecondaryWidth':0.20,'Chin_Width':-0.27,'Chin_Portrusion':0.08,
-                  'Nose_BridgeProminence':-0.06,'Nose_NasalAngle':0.20,'Nose_Potrusion':-0.22,
+              'E_actor_vline':{
+                  'Eyes_Size':-0.31,'Eyes_UpperLidOpenness':-0.32,'Eyes_LowerLidOpenness':-0.12,'Eyes_EyelidsAngle':-0.045,'Eyes_EyelidsAngle2':-0.03,
+                  'Face_BrowRidge_Droop':0.29,'Face_FrontalBone_BrowRidge':0.33,'Face_Zygomatic_Bone':0.29,
+                  'Cheeks_BuccalFat':-0.11,'Cheeks_UpperCheek_Bone':0.31,
+                  'Jaw_Definition':0.70,'Jaw_Mandible':0.38,'Jaw_Mandible_GonialAngle':0.30,'Jaw_Ramus_LocY':-0.20,'Jaw_Width':0.45,
+                  'Chin_Height':0.10,'Chin_SecondaryWidth':0.23,'Chin_Width':-0.17,'Chin_Portrusion':0.11,
+                  'Nose_BridgeProminence':-0.02,'Nose_NasalAngle':0.16,'Nose_Potrusion':-0.18,
               },
-              'C_fashion_masculine':{
-                  'Eyes_Size':-0.34,'Eyes_UpperLidOpenness':-0.31,'Eyes_LowerLidOpenness':-0.14,
-                  'Eyes_EyelidsAngle':-0.08,'Eyes_EyelidsAngle2':-0.06,
-                  'Face_BrowRidge_Droop':0.32,'Face_FrontalBone_BrowRidge':0.38,'Face_Zygomatic_Bone':0.35,
-                  'Cheeks_BuccalFat':-0.16,'Cheeks_UpperCheek_Bone':0.36,
-                  'Jaw_Definition':0.78,'Jaw_Mandible':0.43,'Jaw_Mandible_GonialAngle':-0.39,'Jaw_Ramus_LocY':-0.24,'Jaw_Width':0.43,
-                  'Chin_Height':0.14,'Chin_SecondaryWidth':0.28,'Chin_Width':-0.10,'Chin_Portrusion':0.13,
-                  'Nose_BridgeProminence':0.02,'Nose_NasalAngle':0.14,'Nose_Potrusion':-0.13,
-              }
+              'F_editorial_max':{
+                  'Eyes_Size':-0.40,'Eyes_UpperLidOpenness':-0.41,'Eyes_LowerLidOpenness':-0.18,'Eyes_EyelidsAngle':-0.08,'Eyes_EyelidsAngle2':-0.055,
+                  'Face_BrowRidge_Droop':0.40,'Face_FrontalBone_BrowRidge':0.50,'Face_Zygomatic_Bone':0.39,
+                  'Cheeks_BuccalFat':-0.20,'Cheeks_UpperCheek_Bone':0.40,
+                  'Jaw_Definition':0.90,'Jaw_Mandible':0.56,'Jaw_Mandible_GonialAngle':0.60,'Jaw_Ramus_LocY':-0.26,'Jaw_Width':0.68,
+                  'Chin_Height':0.18,'Chin_SecondaryWidth':0.33,'Chin_Width':0.00,'Chin_Portrusion':0.16,
+                  'Nose_BridgeProminence':0.07,'Nose_NasalAngle':0.08,'Nose_Potrusion':-0.10,
+              },
           }
 
           def setup_character():
@@ -111,136 +97,120 @@ jobs:
               bpy.ops.preferences.addon_enable(module='CharMorph')
               from CharMorph.lib.charlib import library
               from CharMorph.common import manager as mm
-              library.load()
-              ui=bpy.context.window_manager.charmorph_ui
+              library.load();ui=bpy.context.window_manager.charmorph_ui
               ui.base_model=[k for k in library.chars if 'vitruv' in k.lower()][0]
-              if hasattr(ui,'use_sk'): ui.use_sk=False
-              if hasattr(ui,'import_morphs'): ui.import_morphs=False
-              if hasattr(ui,'import_expressions'): ui.import_expressions=False
+              if hasattr(ui,'use_sk'):ui.use_sk=False
+              if hasattr(ui,'import_morphs'):ui.import_morphs=False
+              if hasattr(ui,'import_expressions'):ui.import_expressions=False
               bpy.ops.charmorph.import_char()
-              if not mm.morpher: raise RuntimeError('No morpher')
-              return mm.morpher
+              if not mm.morpher:raise RuntimeError('No morpher')
+              return mm.morpher,bpy.context.active_object
 
-          def eyehair_components(obj):
-              idx=None
+          def find_slot(obj,prefix):
               for i,slot in enumerate(obj.material_slots):
-                  if slot.material and slot.material.name=='EyeHair': idx=i; break
-              if idx is None: return []
+                  if slot.material and slot.material.name.startswith(prefix):return i,slot.material
+              return None,None
+
+          def strip_lashes_keep_brows(obj):
+              idx,mat=find_slot(obj,'EyeHair')
+              print('MATERIALS',[s.material.name if s.material else None for s in obj.material_slots],flush=True)
+              if idx is None:return
               polys=[p.index for p in obj.data.polygons if p.material_index==idx]
               byvert=defaultdict(list)
               for pi in polys:
-                  for v in obj.data.polygons[pi].vertices: byvert[v].append(pi)
-              unseen=set(polys); comps=[]
+                  for v in obj.data.polygons[pi].vertices:byvert[v].append(pi)
+              unseen=set(polys);comps=[]
               while unseen:
-                  seed=unseen.pop(); q=[seed]; comp=[seed]
-                  while q:
-                      pi=q.pop()
+                  seed=unseen.pop();stack=[seed];comp=[seed]
+                  while stack:
+                      pi=stack.pop()
                       for v in obj.data.polygons[pi].vertices:
                           for pj in byvert[v]:
-                              if pj in unseen:
-                                  unseen.remove(pj);q.append(pj);comp.append(pj)
-                  verts=set(); area=0.0
+                              if pj in unseen:unseen.remove(pj);stack.append(pj);comp.append(pj)
+                  verts=set();area=0
                   for pi in comp:
                       p=obj.data.polygons[pi];area+=p.area;verts.update(p.vertices)
                   zs=[obj.data.vertices[v].co.z for v in verts]
-                  comps.append({'polys':comp,'area':area,'zmin':min(zs),'zmax':max(zs),'zmean':sum(zs)/len(zs)})
-              comps.sort(key=lambda c:c['area'],reverse=True)
-              print('EYEHAIR_COMPONENTS',[(round(c['area'],6),round(c['zmin'],4),round(c['zmax'],4),round(c['zmean'],4),len(c['polys'])) for c in comps[:12]],flush=True)
-              return comps
-
-          def remove_lash_components(obj):
-              comps=eyehair_components(obj)
+                  comps.append((area,sum(zs)/len(zs),comp))
+              comps.sort(reverse=True,key=lambda x:x[0])
+              print('EYEHAIR_COMPONENTS',[(round(a,6),round(z,4),len(c)) for a,z,c in comps[:16]],flush=True)
               if len(comps)<=2:return
-              # The two largest connected EyeHair islands are the brows; lashes are the many smaller islands.
-              remove=set()
-              for c in comps[2:]: remove.update(c['polys'])
-              mesh=obj.data
-              keep=[]
-              # Rebuild mesh by deleting selected faces in edit mode while preserving all other material assignments.
-              bpy.context.view_layer.objects.active=obj
-              obj.select_set(True)
-              bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.select_all(action='DESELECT'); bpy.ops.object.mode_set(mode='OBJECT')
+              remove=set(pi for _,_,comp in comps[2:] for pi in comp)
+              bpy.context.view_layer.objects.active=obj;obj.select_set(True)
+              bpy.ops.object.mode_set(mode='EDIT');bpy.ops.mesh.select_all(action='DESELECT');bpy.ops.object.mode_set(mode='OBJECT')
               for pi in remove:
-                  if pi < len(mesh.polygons): mesh.polygons[pi].select=True
-              bpy.ops.object.mode_set(mode='EDIT'); bpy.ops.mesh.delete(type='FACE'); bpy.ops.object.mode_set(mode='OBJECT')
+                  if pi<len(obj.data.polygons):obj.data.polygons[pi].select=True
+              bpy.ops.object.mode_set(mode='EDIT');bpy.ops.mesh.delete(type='FACE');bpy.ops.object.mode_set(mode='OBJECT')
+              print('REMOVED_EYEHAIR_FACES',len(remove),flush=True)
 
           def neutralize_skin(obj):
-              for slot in obj.material_slots:
-                  m=slot.material
-                  if not m: continue
-                  if m.name=='UDIM.Skin':
-                      m.use_nodes=True
-                      bsdf=m.node_tree.nodes.get('Principled BSDF')
-                      if bsdf:
-                          bsdf.inputs['Base Color'].default_value=(0.34,0.16,0.095,1)
-                          bsdf.inputs['Roughness'].default_value=.51
-                          if 'Subsurface Weight' in bsdf.inputs: bsdf.inputs['Subsurface Weight'].default_value=.07
-                  elif m.name=='charmorph_censor':
-                      # Chest will be outside crop, but make it neutral instead of a glossy black bandeau if edge appears.
-                      m.diffuse_color=(0.10,0.10,0.10,1)
+              _,skin=find_slot(obj,'UDIM.Skin')
+              if skin and skin.use_nodes:
+                  bsdf=next((n for n in skin.node_tree.nodes if n.type=='BSDF_PRINCIPLED'),None)
+                  if bsdf:
+                      bsdf.inputs['Base Color'].default_value=(0.31,0.135,0.075,1)
+                      bsdf.inputs['Roughness'].default_value=.54
+                      if 'Subsurface Weight'in bsdf.inputs:bsdf.inputs['Subsurface Weight'].default_value=.055
+              _,censor=find_slot(obj,'charmorph_censor')
+              if censor:censor.diffuse_color=(0.08,0.08,0.08,1)
 
-          def frame_and_render(obj,name):
-              coords=[obj.matrix_world @ Vector(c) for c in obj.bound_box]
+          def clear_camera_lights():
+              for o in list(bpy.context.scene.objects):
+                  if o.type in {'LIGHT','CAMERA'}:bpy.data.objects.remove(o,do_unlink=True)
+
+          def render(obj,name):
+              clear_camera_lights()
+              coords=[obj.matrix_world@Vector(c) for c in obj.bound_box]
               minv=Vector((min(p.x for p in coords),min(p.y for p in coords),min(p.z for p in coords)))
               maxv=Vector((max(p.x for p in coords),max(p.y for p in coords),max(p.z for p in coords)))
-              h=maxv.z-minv.z
-              target=Vector(((minv.x+maxv.x)/2,(minv.y+maxv.y)/2,maxv.z-h*.10))
-              world=bpy.data.worlds.new('LabWorld_'+name); bpy.context.scene.world=world;world.use_nodes=True
-              bg=world.node_tree.nodes['Background'];bg.inputs['Color'].default_value=(.005,.006,.006,1);bg.inputs['Strength'].default_value=.055
+              h=maxv.z-minv.z;target=Vector(((minv.x+maxv.x)/2,(minv.y+maxv.y)/2,maxv.z-h*.10))
+              if not bpy.context.scene.world:
+                  bpy.context.scene.world=bpy.data.worlds.new('LabWorld')
+              w=bpy.context.scene.world;w.use_nodes=True;bg=w.node_tree.nodes['Background'];bg.inputs['Color'].default_value=(.004,.005,.005,1);bg.inputs['Strength'].default_value=.04
               def area(label,loc,energy,size,color):
-                  d=bpy.data.lights.new(label+'_'+name,'AREA');d.energy=energy;d.shape='DISK';d.size=size;d.color=color
-                  o=bpy.data.objects.new(label+'_'+name,d);bpy.context.collection.objects.link(o);o.location=loc;o.rotation_euler=(target-o.location).to_track_quat('-Z','Y').to_euler()
-              area('Key',(target.x-1.1,target.y-1.55,target.z+.95),330,2.2,(1,.88,.80))
-              area('Fill',(target.x+1.2,target.y-1.1,target.z+.4),135,2.6,(.74,.83,1))
-              area('Rim',(target.x+.8,target.y+1.1,target.z+.85),260,2.0,(.63,.76,1))
-              cd=bpy.data.cameras.new('Camera_'+name);cam=bpy.data.objects.new('Camera_'+name,cd);bpy.context.collection.objects.link(cam);bpy.context.scene.camera=cam
-              cam.location=(target.x+.035,target.y-0.71,target.z+.015);cam.rotation_euler=(target-cam.location).to_track_quat('-Z','Y').to_euler();cd.lens=86
-              s=bpy.context.scene;s.render.engine='BLENDER_EEVEE_NEXT';s.render.resolution_x=640;s.render.resolution_y=640;s.render.resolution_percentage=100
+                  d=bpy.data.lights.new(label,'AREA');d.energy=energy;d.shape='DISK';d.size=size;d.color=color
+                  o=bpy.data.objects.new(label,d);bpy.context.collection.objects.link(o);o.location=loc;o.rotation_euler=(target-o.location).to_track_quat('-Z','Y').to_euler()
+              area('Key',(target.x-1.0,target.y-1.55,target.z+.95),250,2.2,(1,.88,.80))
+              area('Fill',(target.x+1.2,target.y-1.15,target.z+.35),90,2.6,(.74,.83,1))
+              area('Rim',(target.x+.9,target.y+1.0,target.z+.85),190,2.0,(.63,.76,1))
+              cd=bpy.data.cameras.new('Camera');cam=bpy.data.objects.new('Camera',cd);bpy.context.collection.objects.link(cam);bpy.context.scene.camera=cam
+              cam.location=(target.x+.11,target.y-.73,target.z+.015);cam.rotation_euler=(target-cam.location).to_track_quat('-Z','Y').to_euler();cd.lens=88
+              s=bpy.context.scene;s.render.engine='BLENDER_EEVEE_NEXT';s.render.resolution_x=512;s.render.resolution_y=512;s.render.resolution_percentage=100
               s.render.image_settings.file_format='PNG';s.render.filepath=os.path.join(OUT,name+'.png');s.view_settings.look='AgX - Medium High Contrast'
-              bpy.ops.render.render(write_still=True)
-              print('WROTE',s.render.filepath,os.path.getsize(s.render.filepath),flush=True)
+              bpy.ops.render.render(write_still=True);print('WROTE',s.render.filepath,os.path.getsize(s.render.filepath),flush=True)
 
           try:
-              m=setup_character()
-              from CharMorph.common import manager as mm
-              obj=bpy.context.active_object
-              for name,delta in VARIANTS.items():
-                  data=dict(BASE);data.update(delta)
-                  payload={'type':['Default'],'morphs':data,'materials':{},'meta':{}}
+              m,obj=setup_character()
+              for i,(name,delta) in enumerate(VARIANTS.items()):
+                  data=dict(BASE);data.update(delta);payload={'type':['Default'],'morphs':data,'materials':{},'meta':{}}
                   m.set_L1('Default',False);m.apply_morph_data(payload,False);bpy.context.view_layer.update()
-                  # First variant diagnoses/removes lash islands once; topology remains shared for later morph positions.
-                  if name==list(VARIANTS)[0]:
-                      remove_lash_components(obj)
-                      neutralize_skin(obj)
-                  frame_and_render(obj,name)
-              with open(os.path.join(OUT,'recipe.txt'),'w') as f:
+                  if i==0:strip_lashes_keep_brows(obj);neutralize_skin(obj)
+                  render(obj,name)
+              with open(os.path.join(OUT,'recipe.txt'),'w')as f:
                   for n,d in VARIANTS.items():f.write(n+'\n'+repr({**BASE,**d})+'\n\n')
-              with open('/tmp/candidates-ok','w') as f:f.write('ok')
-          except Exception:
-              traceback.print_exc();raise
+              open('/tmp/candidates-ok','w').write('ok')
+          except Exception:traceback.print_exc();raise
           PY
-          blender --background --python /tmp/render_candidates.py > /tmp/vt-candidates.log 2>&1 || true
-          tail -n 260 /tmp/vt-candidates.log
+          blender --background --python /tmp/render_candidates.py > /tmp/vt-candidates-v2.log 2>&1 || true
+          tail -n 260 /tmp/vt-candidates-v2.log
           test -f /tmp/candidates-ok
-          test -s character-lab/vitruvian-candidates/A_sharp_editorial.png
-          test -s character-lab/vitruvian-candidates/B_young_actor.png
-          test -s character-lab/vitruvian-candidates/C_fashion_masculine.png
+          test -s character-lab/vitruvian-candidates-v2/D_handsome_balanced.png
+          test -s character-lab/vitruvian-candidates-v2/E_actor_vline.png
+          test -s character-lab/vitruvian-candidates-v2/F_editorial_max.png
       - name: Build contact sheet
         run: |
           python3 -m pip install --quiet pillow
           python3 - <<'PY'
           from PIL import Image,ImageDraw
-          import os
-          root='character-lab/vitruvian-candidates'
-          names=['A_sharp_editorial','B_young_actor','C_fashion_masculine']
-          sheet=Image.new('RGB',(1920,700),(8,9,9));d=ImageDraw.Draw(sheet)
+          root='character-lab/vitruvian-candidates-v2';names=['D_handsome_balanced','E_actor_vline','F_editorial_max']
+          sheet=Image.new('RGB',(1536,568),(8,9,9));d=ImageDraw.Draw(sheet)
           for i,n in enumerate(names):
-              im=Image.open(f'{root}/{n}.png').convert('RGB');sheet.paste(im,(i*640,0));d.rectangle((i*640,640,(i+1)*640,700),fill=(8,9,9));d.text((i*640+20,660),n,fill=(235,238,235))
+              im=Image.open(f'{root}/{n}.png').convert('RGB');sheet.paste(im,(i*512,0));d.rectangle((i*512,512,(i+1)*512,568),fill=(8,9,9));d.text((i*512+18,532),n,fill=(235,238,235))
           sheet.save(f'{root}/contact-sheet.jpg',quality=94)
           PY
       - uses: actions/upload-artifact@v4
         with:
-          name: vitruvian-eastasian-face-candidates
+          name: vitruvian-eastasian-face-candidates-v2
           path: |
-            character-lab/vitruvian-candidates/
-            /tmp/vt-candidates.log
+            character-lab/vitruvian-candidates-v2/
+            /tmp/vt-candidates-v2.log
