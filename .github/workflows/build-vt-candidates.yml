@@ -41,11 +41,15 @@ jobs:
           git lfs pull
       - name: Install character library into Blender
         run: |
-          mkdir -p /tmp/CharMorph/data/characters/vitruvian
-          cp -a /tmp/vitruvian/. /tmp/CharMorph/data/characters/vitruvian/
+          if [ ! -f /tmp/CharMorph/data/characters/vitruvian/config.yaml ]; then
+            mkdir -p /tmp/CharMorph/data/characters/vitruvian
+            rsync -a --exclude='.git' /tmp/vitruvian/ /tmp/CharMorph/data/characters/vitruvian/
+          fi
           BLENDER_ADDONS="$HOME/.config/blender/4.3/scripts/addons"
           mkdir -p "$BLENDER_ADDONS"
-          cp -a /tmp/CharMorph "$BLENDER_ADDONS/CharMorph"
+          rm -rf "$BLENDER_ADDONS/CharMorph"
+          ln -s /tmp/CharMorph "$BLENDER_ADDONS/CharMorph"
+          test -f /tmp/CharMorph/data/characters/vitruvian/config.yaml
           blender --version
       - name: Render D E F face candidates
         run: |
