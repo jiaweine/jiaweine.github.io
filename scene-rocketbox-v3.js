@@ -27,9 +27,9 @@ function applyEditorialExpression(mesh){
   if(!mesh.morphTargetDictionary||!mesh.morphTargetInfluences)return [];
   const applied=[];
   const rules=[
-    {rx:/squint|lid.?tight|eye.?squeeze|au[_ -]?0?7/i,value:.16},
-    {rx:/brow.*(down|lower)|au[_ -]?0?4/i,value:.07},
-    {rx:/smile|corner.*pull|au[_ -]?12/i,value:.022}
+    {rx:/squint|lid.?tight|eye.?squeeze|au[_ -]?0?7/i,value:.045},
+    {rx:/brow.*(down|lower)|au[_ -]?0?4/i,value:.032},
+    {rx:/smile|corner.*pull|au[_ -]?12/i,value:.015}
   ];
   for(const [name,index] of Object.entries(mesh.morphTargetDictionary)){
     for(const rule of rules){
