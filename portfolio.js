@@ -2,6 +2,15 @@
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const reveals = [...document.querySelectorAll('.reveal')];
 
+  const revealAnchorTarget = () => {
+    if (!location.hash) return;
+    let target = null;
+    try { target = document.querySelector(location.hash); } catch (_) { return; }
+    if (!target) return;
+    if (target.classList.contains('reveal')) target.classList.add('visible');
+    target.querySelectorAll?.('.reveal').forEach((el) => el.classList.add('visible'));
+  };
+
   if (!reduceMotion && 'IntersectionObserver' in window) {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
@@ -15,6 +24,11 @@
       el.style.transitionDelay = `${Math.min(i % 4, 3) * 45}ms`;
       observer.observe(el);
     });
+
+    // Browsers may resolve the initial hash after observers are registered.
+    // Reveal the linked section explicitly so direct /#focus-style URLs never open on an all-transparent viewport.
+    requestAnimationFrame(() => requestAnimationFrame(revealAnchorTarget));
+    addEventListener('hashchange', () => requestAnimationFrame(revealAnchorTarget), { passive: true });
   } else {
     reveals.forEach((el) => el.classList.add('visible'));
   }
