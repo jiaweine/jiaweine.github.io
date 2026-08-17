@@ -3,64 +3,65 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#0a0b0a" />
+  <meta name="theme-color" content="#0b0d0c" />
   <meta name="description" content="Jiawei Wang — algorithm research, AI systems and full-stack engineering." />
   <title>Jiawei Wang — Research & Systems</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./portfolio.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+      }
+    }
+  </script>
 </head>
 <body>
   <div class="ambient-grid" aria-hidden="true"></div>
 
   <header class="topbar" id="top">
     <a class="identity" href="#top" aria-label="Jiawei Wang home">
-      <span class="identity-dot" aria-hidden="true"></span>
-      <span>Jiawei Wang</span>
+      <span class="identity-mark">JW</span>
+      <span class="identity-copy"><strong>Jiawei Wang</strong><small>Research & Systems</small></span>
     </a>
     <nav class="nav" aria-label="Primary">
       <a href="#focus">Focus</a>
       <a href="#work">Work</a>
       <a href="#stack">Stack</a>
-      <a href="https://github.com/jiaweine" target="_blank" rel="noreferrer">GitHub ↗</a>
+      <a class="nav-github" href="https://github.com/jiaweine" target="_blank" rel="noreferrer">GitHub ↗</a>
     </nav>
   </header>
 
   <main>
     <section class="hero" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <div class="eyebrow reveal">
-          <span class="signal"></span>
-          <span>Research engineer · AI systems · full-stack</span>
-        </div>
-        <h1 id="hero-title" class="display reveal">I turn research<br /><span>into systems.</span></h1>
-        <p class="hero-summary reveal">Multimodal learning, search and recommendation, agent post-training, and the evaluation harnesses that make intelligent systems measurable, recoverable, and useful.</p>
+        <div class="eyebrow reveal"><span class="signal"></span><span>JIAWEI WANG · 王嘉伟</span></div>
+        <h1 id="hero-title" class="display reveal">Research<br /><span>that ships.</span></h1>
+        <p class="hero-summary reveal">I work across multimodal learning, search and recommendation, agent post-training, and the evaluation systems that turn research into reliable products.</p>
         <div class="hero-actions reveal">
-          <a class="primary-link" href="#work">Explore selected work <span>↘</span></a>
-          <a class="secondary-link" href="https://github.com/jiaweine" target="_blank" rel="noreferrer">github.com/jiaweine</a>
+          <a class="primary-link" href="#work"><span>Selected work</span><b>↘</b></a>
+          <a class="secondary-link" href="https://doi.org/10.1016/j.ins.2026.123925" target="_blank" rel="noreferrer">Information Sciences · 2026 ↗</a>
         </div>
+        <div class="hero-note reveal"><span>AI RESEARCH ENGINEER</span><span>FULL-STACK SYSTEMS</span></div>
       </div>
 
-      <div class="hero-stage reveal" aria-label="Interactive 3D portrait of Jiawei Wang">
-        <div class="stage-frame" aria-hidden="true"><span class="corner corner-a"></span><span class="corner corner-b"></span><span class="corner corner-c"></span><span class="corner corner-d"></span></div>
-        <div class="scene-topline"><span>DIGITAL PORTRAIT / THREE.JS</span><span>REALTIME · WEBGL</span></div>
+      <div class="hero-stage reveal" aria-label="Interactive realtime 3D portrait">
+        <div class="stage-shell" aria-hidden="true"></div>
+        <div class="scene-topline"><span>REALTIME PORTRAIT</span><span>THREE.JS / GLTF</span></div>
         <div id="avatar3d" class="avatar3d"></div>
-        <div id="sceneFallback" class="scene-fallback" aria-hidden="true"><strong>JW</strong><span>Loading realtime portrait</span></div>
-        <div class="scene-foot"><span>pointer → gaze</span><span>scroll → camera</span></div>
+        <div id="sceneFallback" class="scene-fallback" aria-hidden="true"><span class="fallback-ring"></span><strong>Rendering portrait</strong></div>
+        <div class="scene-foot"><span><i></i> realtime</span><span>pointer → gaze · scroll → camera</span></div>
       </div>
 
-      <aside class="hero-rail reveal" aria-label="Current research directions">
-        <div class="rail-head"><span>NOW / 2026</span><span>SGT +08</span></div>
-        <ol>
-          <li><b>01</b><span>Multimodal AI</span></li>
-          <li><b>02</b><span>Search, Ads & Recommendation</span></li>
-          <li><b>03</b><span>Agent Post-Training</span></li>
-          <li><b>04</b><span>Harness Engineering</span></li>
-        </ol>
-      </aside>
-
-      <div class="hero-footer reveal"><span>JIAWEI WANG · 王嘉伟</span><span>Researcher when the loss converges. Engineer when it doesn’t.</span></div>
+      <div class="hero-focusbar reveal" aria-label="Current research directions">
+        <div><b>01</b><span>Multimodal AI</span><small>representation · reasoning</small></div>
+        <div><b>02</b><span>Search & Recommendation</span><small>retrieval · ranking</small></div>
+        <div><b>03</b><span>Agent Post-Training</span><small>trajectory · reward</small></div>
+        <div><b>04</b><span>Harness Engineering</span><small>runtime · verification</small></div>
+      </div>
     </section>
 
     <section class="statement section-shell reveal">
@@ -69,7 +70,10 @@
     </section>
 
     <section id="focus" class="focus section-shell">
-      <header class="section-head reveal"><div><span class="section-index">01 / CURRENT FOCUS</span><h2>Four directions.<br /><span>One feedback loop.</span></h2></div><p>Better models demand better evaluation. Better harnesses reveal better research questions. The loop is the product.</p></header>
+      <header class="section-head reveal">
+        <div><span class="section-index">01 / CURRENT FOCUS</span><h2>Four directions.<br /><span>One feedback loop.</span></h2></div>
+        <p>Better models demand better evaluation. Better harnesses reveal better research questions. I care about the full loop, not just a single benchmark.</p>
+      </header>
       <div class="focus-layout">
         <aside class="focus-aside reveal"><div class="focus-orbit" aria-hidden="true"><i></i><i></i><i></i></div><p>observe<br />evaluate<br />iterate<br />ship</p></aside>
         <div class="focus-list">
@@ -103,7 +107,10 @@
     <section class="principle section-shell reveal"><span class="section-index">04 / ENGINEERING PRINCIPLE</span><blockquote>Build for the <span>second run.</span></blockquote><div class="principle-bottom"><p>A prototype proves an idea. A good system keeps working after the demo ends.</p><div><span>Testable</span><span>Traceable</span><span>Recoverable</span><span>Measurable</span><span>Useful</span></div></div></section>
   </main>
 
-  <footer class="footer section-shell"><div><strong>Jiawei Wang</strong><span>Algorithm Research · AI Systems · Full-Stack Engineering</span></div><nav><a href="https://github.com/jiaweine" target="_blank" rel="noreferrer">GitHub ↗</a><a href="https://doi.org/10.1016/j.ins.2026.123925" target="_blank" rel="noreferrer">Paper ↗</a><a href="#top">Top ↑</a></nav></footer>
+  <footer class="footer section-shell">
+    <div><strong>Jiawei Wang</strong><span>Algorithm Research · AI Systems · Full-Stack Engineering</span><small>Realtime head study uses the Lee Perry-Smith scan (CC BY 3.0) as a geometry base.</small></div>
+    <nav><a href="https://github.com/jiaweine" target="_blank" rel="noreferrer">GitHub ↗</a><a href="https://doi.org/10.1016/j.ins.2026.123925" target="_blank" rel="noreferrer">Paper ↗</a><a href="#top">Top ↑</a></nav>
+  </footer>
 
   <script src="./portfolio.js"></script>
   <script type="module" src="./scene.js"></script>
