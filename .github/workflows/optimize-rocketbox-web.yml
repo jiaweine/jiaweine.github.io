@@ -1,0 +1,49 @@
+name: Optimize Rocketbox Web Asset
+
+on:
+  push:
+    branches:
+      - agent/high-fidelity-3d-redesign-v2
+    paths:
+      - .github/workflows/optimize-rocketbox-web.yml
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: agent/high-fidelity-3d-redesign-v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Inspect and optimize GLB
+        run: |
+          npx --yes @gltf-transform/cli@4 inspect assets/rocketbox-male10.glb | tee /tmp/rocketbox-before.txt
+          npx --yes @gltf-transform/cli@4 optimize \
+            assets/rocketbox-male10.glb \
+            assets/rocketbox-male10-web.glb \
+            --no-compress \
+            --texture-compress webp
+          npx --yes @gltf-transform/cli@4 inspect assets/rocketbox-male10-web.glb | tee /tmp/rocketbox-after.txt
+          ls -lh assets/rocketbox-male10*.glb | tee /tmp/rocketbox-sizes.txt
+          test -s assets/rocketbox-male10-web.glb
+      - name: Upload optimization diagnostics
+        uses: actions/upload-artifact@v4
+        with:
+          name: rocketbox-web-optimization
+          path: |
+            /tmp/rocketbox-before.txt
+            /tmp/rocketbox-after.txt
+            /tmp/rocketbox-sizes.txt
+      - name: Commit optimized fallback
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/rocketbox-male10-web.glb
+          git commit -m 'Add optimized Rocketbox web fallback'
+          git push origin HEAD:agent/high-fidelity-3d-redesign-v2
