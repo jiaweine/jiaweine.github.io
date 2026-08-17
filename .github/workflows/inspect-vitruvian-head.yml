@@ -1,0 +1,41 @@
+name: Inspect Vitruvian Head Morphs
+
+on:
+  push:
+    branches:
+      - agent/high-fidelity-3d-redesign-v2
+    paths:
+      - .github/workflows/inspect-vitruvian-head.yml
+
+permissions:
+  contents: read
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download and inspect prebuilt CC0 head
+        run: |
+          python3 - <<'PY'
+          import json, struct, urllib.request
+          url='https://raw.githubusercontent.com/ibrews/VitruvianGodot/main/godot_project/vitruvian_head.glb'
+          path='/tmp/vitruvian_head.glb'
+          urllib.request.urlretrieve(url,path)
+          with open(path,'rb') as f:
+              magic,version,length=struct.unpack('<4sII',f.read(12))
+              if magic!=b'glTF': raise RuntimeError(magic)
+              chunk_len,chunk_type=struct.unpack('<II',f.read(8))
+              doc=json.loads(f.read(chunk_len).decode('utf-8').rstrip('\x00 '))
+          lines=[f'GLB version={version} bytes={length}']
+          for i,m in enumerate(doc.get('meshes',[])):
+              names=(m.get('extras') or {}).get('targetNames') or []
+              lines.append(f'MESH {i} {m.get("name")} targets={len(names)}')
+              lines.extend('  '+n for n in names)
+          with open('vitruvian-head-morphs.txt','w') as out: out.write('\n'.join(lines))
+          print('\n'.join(lines))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vitruvian-head-morphs
+          path: vitruvian-head-morphs.txt
