@@ -1,0 +1,189 @@
+name: Build Vitruvian Male Lookdev Candidates
+
+on:
+  push:
+    branches:
+      - agent/high-fidelity-3d-redesign-v2
+    paths:
+      - .github/workflows/build-vt-lookdev.yml
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: moguri/setup-blender@v1
+        with:
+          blender-version: '4.3'
+      - name: Install headless runtime
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y libegl1 libgl1
+      - name: Restore cached character source
+        uses: actions/cache@v4
+        with:
+          path: |
+            /tmp/CharMorph
+            /tmp/vitruvian
+          key: vitruvian-charmorph-20260818-v1
+      - name: Mount CharMorph addon
+        run: |
+          BLENDER_ADDONS="$HOME/.config/blender/4.3/scripts/addons"
+          mkdir -p "$BLENDER_ADDONS"
+          rm -rf "$BLENDER_ADDONS/CharMorph"
+          ln -s /tmp/CharMorph "$BLENDER_ADDONS/CharMorph"
+          test -f /tmp/CharMorph/data/characters/vitruvian/config.yaml
+      - name: Render G H finished lookdev candidates
+        run: |
+          cat > /tmp/render_lookdev.py <<'PY'
+          import bpy, os, traceback
+          from mathutils import Vector
+
+          OUT=os.path.abspath('character-lab/vitruvian-lookdev')
+          os.makedirs(OUT,exist_ok=True)
+          BASE={
+              'Gender_Male':1.0,'Race_EastAsian':1.0,'Race_White':0.0,'Age_Old':0.0,'Age_Baby':0.0,
+              'BodyType_Lean':0.16,'BodyType_MesoMorph':0.28,
+              'Eyes_Eyelid_Monolid':0.90,'Eyes_Eyelid_hooded':0.34,'Eyes_EyelidsCrease':-0.34,'Eyes_EyebrowsDroop':-0.18,
+              'Mouth_Lips_Length':0.05,'Mouth_Lips_UpperLipDepth':-0.28,'Mouth_PhiltrumHeight':-0.06,
+              'Nose_NostrilSize':-0.05,'Nose_Tip_Potrusion':-0.04,'Generic_Assymetry':0.025,
+          }
+          VARIANTS={
+              'G_asian_editorial':{
+                  'Eyes_Size':-0.43,'Eyes_UpperLidOpenness':-0.42,'Eyes_LowerLidOpenness':-0.16,'Eyes_EyelidsAngle':-0.055,'Eyes_EyelidsAngle2':-0.035,
+                  'Face_BrowRidge_Droop':0.37,'Face_FrontalBone_BrowRidge':0.44,'Face_Zygomatic_Bone':0.34,
+                  'Cheeks_BuccalFat':-0.16,'Cheeks_UpperCheek_Bone':0.36,
+                  'Jaw_Definition':0.84,'Jaw_Mandible':0.50,'Jaw_Mandible_GonialAngle':0.47,'Jaw_Ramus_LocY':-0.22,'Jaw_Width':0.57,
+                  'Chin_Height':0.15,'Chin_SecondaryWidth':0.26,'Chin_Width':-0.10,'Chin_Portrusion':0.14,
+                  'Nose_BridgeProminence':0.04,'Nose_NasalAngle':0.12,'Nose_Potrusion':-0.12,
+              },
+              'H_actor_vline':{
+                  'Eyes_Size':-0.39,'Eyes_UpperLidOpenness':-0.38,'Eyes_LowerLidOpenness':-0.14,'Eyes_EyelidsAngle':-0.04,'Eyes_EyelidsAngle2':-0.025,
+                  'Face_BrowRidge_Droop':0.31,'Face_FrontalBone_BrowRidge':0.36,'Face_Zygomatic_Bone':0.31,
+                  'Cheeks_BuccalFat':-0.12,'Cheeks_UpperCheek_Bone':0.33,
+                  'Jaw_Definition':0.76,'Jaw_Mandible':0.43,'Jaw_Mandible_GonialAngle':0.36,'Jaw_Ramus_LocY':-0.20,'Jaw_Width':0.49,
+                  'Chin_Height':0.12,'Chin_SecondaryWidth':0.22,'Chin_Width':-0.18,'Chin_Portrusion':0.12,
+                  'Nose_BridgeProminence':0.00,'Nose_NasalAngle':0.15,'Nose_Potrusion':-0.16,
+              }
+          }
+
+          def setup():
+              bpy.ops.wm.read_factory_settings(use_empty=True)
+              bpy.ops.preferences.addon_enable(module='CharMorph')
+              from CharMorph.lib.charlib import library
+              from CharMorph.common import manager as mm
+              library.load();ui=bpy.context.window_manager.charmorph_ui
+              ui.base_model=[k for k in library.chars if 'vitruv' in k.lower()][0]
+              if hasattr(ui,'use_sk'):ui.use_sk=False
+              if hasattr(ui,'import_morphs'):ui.import_morphs=False
+              if hasattr(ui,'import_expressions'):ui.import_expressions=False
+              bpy.ops.charmorph.import_char()
+              obj=bpy.context.active_object
+              if not mm.morpher or not obj:raise RuntimeError('Character import failed')
+              return mm.morpher,obj,ui,library
+
+          def replace_skin(obj):
+              skin=bpy.data.materials.new('LookdevSkin')
+              skin.use_nodes=True
+              bsdf=skin.node_tree.nodes.get('Principled BSDF')
+              bsdf.inputs['Base Color'].default_value=(0.38,0.205,0.135,1)
+              bsdf.inputs['Roughness'].default_value=.50
+              if 'Subsurface Weight' in bsdf.inputs:bsdf.inputs['Subsurface Weight'].default_value=.065
+              for i,slot in enumerate(obj.material_slots):
+                  if slot.material and slot.material.name.startswith('UDIM.Skin'):
+                      obj.data.materials[i]=skin
+              return skin
+
+          def hide_source_eye_hair(obj):
+              # The source brows/lashes read as makeup in the default material. Hide that source slot;
+              # fitted standalone eyebrows are added below.
+              for slot in obj.material_slots:
+                  if slot.material and slot.material.name.startswith('EyeHair'):
+                      m=slot.material;m.use_nodes=True
+                      for n in list(m.node_tree.nodes):m.node_tree.nodes.remove(n)
+                      out=m.node_tree.nodes.new('ShaderNodeOutputMaterial')
+                      trans=m.node_tree.nodes.new('ShaderNodeBsdfTransparent')
+                      m.node_tree.links.new(trans.outputs[0],out.inputs[0])
+
+          def fit_asset(ui,obj,key):
+              ui.fitting_char=obj
+              ui.fitting_library_asset='char_'+key
+              before=set(bpy.context.scene.objects)
+              res=bpy.ops.charmorph.fit_library()
+              added=[o for o in bpy.context.scene.objects if o not in before]
+              print('FIT',key,res,[(o.name,o.type) for o in added],flush=True)
+              return added
+
+          def style_asset(objs,kind):
+              for o in objs:
+                  if o.type!='MESH':continue
+                  mat=bpy.data.materials.new(f'{kind}_{o.name}')
+                  mat.use_nodes=True;bsdf=mat.node_tree.nodes.get('Principled BSDF')
+                  if kind=='hair':
+                      bsdf.inputs['Base Color'].default_value=(0.008,0.010,0.011,1);bsdf.inputs['Roughness'].default_value=.43
+                  else:
+                      bsdf.inputs['Base Color'].default_value=(0.012,0.013,0.013,1);bsdf.inputs['Roughness'].default_value=.58
+                  o.data.materials.clear();o.data.materials.append(mat)
+
+          def clear_render_rig():
+              for o in list(bpy.context.scene.objects):
+                  if o.type in {'LIGHT','CAMERA'}:bpy.data.objects.remove(o,do_unlink=True)
+
+          def render(obj,name):
+              clear_render_rig()
+              coords=[obj.matrix_world@Vector(c) for c in obj.bound_box]
+              minv=Vector((min(p.x for p in coords),min(p.y for p in coords),min(p.z for p in coords)))
+              maxv=Vector((max(p.x for p in coords),max(p.y for p in coords),max(p.z for p in coords)))
+              h=maxv.z-minv.z;target=Vector(((minv.x+maxv.x)/2,(minv.y+maxv.y)/2,maxv.z-h*.105))
+              if not bpy.context.scene.world:bpy.context.scene.world=bpy.data.worlds.new('World')
+              w=bpy.context.scene.world;w.use_nodes=True;bg=w.node_tree.nodes['Background'];bg.inputs['Color'].default_value=(.004,.005,.005,1);bg.inputs['Strength'].default_value=.055
+              def area(label,loc,energy,size,color):
+                  d=bpy.data.lights.new(label,'AREA');d.energy=energy;d.shape='DISK';d.size=size;d.color=color
+                  o=bpy.data.objects.new(label,d);bpy.context.collection.objects.link(o);o.location=loc;o.rotation_euler=(target-o.location).to_track_quat('-Z','Y').to_euler()
+              area('Key',(target.x-1.0,target.y-1.55,target.z+.95),320,2.15,(1,.87,.80))
+              area('Fill',(target.x+1.3,target.y-1.0,target.z+.35),115,2.7,(.72,.82,1))
+              area('Rim',(target.x+.95,target.y+1.1,target.z+.85),245,2.0,(.62,.76,1))
+              cd=bpy.data.cameras.new('Camera');cam=bpy.data.objects.new('Camera',cd);bpy.context.collection.objects.link(cam);bpy.context.scene.camera=cam
+              cam.location=(target.x+.12,target.y-.76,target.z+.02);cam.rotation_euler=(target-cam.location).to_track_quat('-Z','Y').to_euler();cd.lens=88
+              s=bpy.context.scene;s.render.engine='BLENDER_EEVEE_NEXT';s.render.resolution_x=620;s.render.resolution_y=620;s.render.resolution_percentage=100
+              s.render.image_settings.file_format='PNG';s.render.filepath=os.path.join(OUT,name+'.png');s.view_settings.look='AgX - Medium High Contrast'
+              bpy.ops.render.render(write_still=True);print('WROTE',s.render.filepath,os.path.getsize(s.render.filepath),flush=True)
+
+          try:
+              m,obj,ui,library=setup()
+              replace_skin(obj);hide_source_eye_hair(obj)
+              hair=fit_asset(ui,obj,'Combover_zoro_d');style_asset(hair,'hair')
+              brows=fit_asset(ui,obj,'mind_eyebrows_11_Default');style_asset(brows,'brow')
+              for name,delta in VARIANTS.items():
+                  data=dict(BASE);data.update(delta)
+                  m.set_L1('Default',False);m.apply_morph_data({'type':['Default'],'morphs':data,'materials':{},'meta':{}},False)
+                  if m.fitter:m.fitter.clear_cache();m.fitter.refit_all()
+                  bpy.context.view_layer.update();render(obj,name)
+              open('/tmp/lookdev-ok','w').write('ok')
+          except Exception:traceback.print_exc();raise
+          PY
+          blender --background --python /tmp/render_lookdev.py > /tmp/vt-lookdev.log 2>&1 || true
+          tail -n 260 /tmp/vt-lookdev.log
+          test -f /tmp/lookdev-ok
+          test -s character-lab/vitruvian-lookdev/G_asian_editorial.png
+          test -s character-lab/vitruvian-lookdev/H_actor_vline.png
+      - name: Build lookdev comparison
+        run: |
+          python3 -m pip install --quiet pillow
+          python3 - <<'PY'
+          from PIL import Image,ImageDraw
+          root='character-lab/vitruvian-lookdev';names=['G_asian_editorial','H_actor_vline']
+          sheet=Image.new('RGB',(1240,680),(8,9,9));d=ImageDraw.Draw(sheet)
+          for i,n in enumerate(names):
+              im=Image.open(f'{root}/{n}.png').convert('RGB');sheet.paste(im,(i*620,0));d.rectangle((i*620,620,(i+1)*620,680),fill=(8,9,9));d.text((i*620+20,640),n,fill=(235,238,235))
+          sheet.save(f'{root}/contact-sheet.jpg',quality=94)
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: vitruvian-male-lookdev-candidates
+          path: |
+            character-lab/vitruvian-lookdev/
+            /tmp/vt-lookdev.log
