@@ -1,4 +1,4 @@
-import './scene-rocketbox.js';
+import './scene-rocketbox-v2.js';
 
 document.querySelector('.scene-topline span:first-child')?.replaceChildren(document.createTextNode('RIGGED DIGITAL PORTRAIT'));
 const attribution = document.querySelector('.footer small');
