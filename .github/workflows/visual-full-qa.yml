@@ -1,0 +1,43 @@
+name: Full Page Visual QA
+
+on:
+  push:
+    branches:
+      - agent/high-fidelity-3d-redesign-v2
+    paths:
+      - .github/workflows/visual-full-qa.yml
+
+permissions:
+  contents: read
+
+jobs:
+  screenshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Start local server
+        run: |
+          python3 -m http.server 4173 >/tmp/full-qa-server.log 2>&1 &
+          sleep 2
+      - name: Capture key sections
+        run: |
+          CHROME="$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser)"
+          FLAGS="--headless=new --no-sandbox --enable-webgl --ignore-gpu-blocklist --use-gl=angle --use-angle=swiftshader --enable-unsafe-swiftshader --disable-dev-shm-usage"
+          capture () {
+            local file="$1" url="$2"
+            "$CHROME" $FLAGS --window-size=1440,1100 --virtual-time-budget=8500 --screenshot="$file" "$url" 2>>chrome-full.log
+            test -s "$file"
+          }
+          capture qa-focus.png http://127.0.0.1:4173/#focus
+          capture qa-work.png http://127.0.0.1:4173/#work
+          capture qa-stack.png http://127.0.0.1:4173/#stack
+          "$CHROME" $FLAGS --window-size=390,844 --virtual-time-budget=8500 --screenshot=qa-mobile-long.png http://127.0.0.1:4173/#focus 2>>chrome-full.log
+      - uses: actions/upload-artifact@v4
+        with:
+          name: full-page-visual-qa
+          path: |
+            qa-focus.png
+            qa-work.png
+            qa-stack.png
+            qa-mobile-long.png
+            chrome-full.log
