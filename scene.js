@@ -1,165 +1,205 @@
 const mount = document.getElementById('avatar3d');
 const fallback = document.getElementById('sceneFallback');
-if (!mount) throw new Error('3D mount missing');
 
-async function loadThree(){
+async function loadThree() {
   const sources = [
     'https://cdnjs.cloudflare.com/ajax/libs/three.js/0.169.0/three.module.min.js',
     'https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.min.js',
     'https://unpkg.com/three@0.169.0/build/three.module.js'
   ];
-  let last;
-  for (const src of sources){
-    try { return await import(src); } catch (err) { last = err; }
+  let lastError;
+  for (const src of sources) {
+    try { return await import(src); } catch (error) { lastError = error; }
   }
-  throw last || new Error('Unable to load Three.js');
+  throw lastError || new Error('Three.js failed to load');
 }
 
-try {
-  const THREE = await loadThree();
-  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const finePointer = matchMedia('(pointer:fine)').matches;
+if (mount) {
+  try {
+    const THREE = await loadThree();
+    const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const finePointer = matchMedia('(pointer:fine)').matches;
 
-  const renderer = new THREE.WebGLRenderer({ alpha:true, antialias:true, powerPreference:'high-performance' });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.8));
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.08;
-  renderer.outputColorSpace = THREE.SRGBColorSpace;
-  mount.appendChild(renderer.domElement);
+    const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true, powerPreference: 'high-performance' });
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 1.75));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.05;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    mount.appendChild(renderer.domElement);
 
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(31, 1, .1, 100);
-  camera.position.set(.15, 1.35, 7.6);
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(30, 1, 0.1, 100);
+    camera.position.set(0.1, 1.25, 7.7);
 
-  const root = new THREE.Group();
-  root.position.set(-.05, -.46, 0);
-  root.rotation.y = -.18;
-  scene.add(root);
+    const root = new THREE.Group();
+    root.position.set(-0.15, -0.52, 0);
+    root.rotation.y = -0.15;
+    scene.add(root);
 
-  const skin = new THREE.MeshStandardMaterial({ color:0xe7ad86, roughness:.72, metalness:0 });
-  const skinWarm = new THREE.MeshStandardMaterial({ color:0xd89570, roughness:.78 });
-  const hair = new THREE.MeshStandardMaterial({ color:0x171816, roughness:.32, metalness:.06 });
-  const shirt = new THREE.MeshStandardMaterial({ color:0x242522, roughness:.58 });
-  const shirt2 = new THREE.MeshStandardMaterial({ color:0x343531, roughness:.65 });
-  const silver = new THREE.MeshStandardMaterial({ color:0xc9cdd0, roughness:.19, metalness:.92 });
-  const dark = new THREE.MeshStandardMaterial({ color:0x1c1d1a, roughness:.52 });
-  const deskMat = new THREE.MeshStandardMaterial({ color:0x6d513e, roughness:.78 });
-  const keyMat = new THREE.MeshStandardMaterial({ color:0xe5e0d6, roughness:.62 });
-  const screenMat = new THREE.MeshStandardMaterial({ color:0x171a18, emissive:0x283d32, emissiveIntensity:.5, roughness:.35 });
+    const clay = new THREE.MeshPhysicalMaterial({ color: 0xcbb9aa, roughness: 0.72, metalness: 0.0, clearcoat: 0.04 });
+    const clayShadow = new THREE.MeshStandardMaterial({ color: 0xb69c88, roughness: 0.78 });
+    const hair = new THREE.MeshStandardMaterial({ color: 0x181a18, roughness: 0.34, metalness: 0.04 });
+    const shirt = new THREE.MeshStandardMaterial({ color: 0x2d302c, roughness: 0.65 });
+    const shirtSoft = new THREE.MeshStandardMaterial({ color: 0x424640, roughness: 0.72 });
+    const silver = new THREE.MeshPhysicalMaterial({ color: 0xc8cbc9, roughness: 0.2, metalness: 0.88, clearcoat: 0.22 });
+    const charcoal = new THREE.MeshStandardMaterial({ color: 0x20221f, roughness: 0.52 });
+    const wood = new THREE.MeshStandardMaterial({ color: 0x9a806b, roughness: 0.78 });
+    const keyboardMat = new THREE.MeshStandardMaterial({ color: 0xe5e1d8, roughness: 0.68 });
+    const screenMat = new THREE.MeshStandardMaterial({ color: 0x1d211d, emissive: 0x27362c, emissiveIntensity: 0.45, roughness: 0.38 });
+    const codeMat = new THREE.MeshStandardMaterial({ color: 0xaebdb0, emissive: 0x6a8970, emissiveIntensity: 0.48, roughness: 0.42 });
+    const codeWarm = new THREE.MeshStandardMaterial({ color: 0xc7a191, emissive: 0x765147, emissiveIntensity: 0.35, roughness: 0.42 });
 
-  const shadowify = (mesh) => { mesh.castShadow = true; mesh.receiveShadow = true; return mesh; };
-  const sphere = (r, mat, pos, scale=[1,1,1], seg=40) => {
-    const m = shadowify(new THREE.Mesh(new THREE.SphereGeometry(r, seg, Math.max(18,seg/2)), mat));
-    m.position.set(...pos); m.scale.set(...scale); root.add(m); return m;
-  };
-  const box = (size, mat, pos, rot=[0,0,0]) => {
-    const m=shadowify(new THREE.Mesh(new THREE.BoxGeometry(...size),mat)); m.position.set(...pos); m.rotation.set(...rot); root.add(m); return m;
-  };
-
-  const torso = sphere(1, shirt, [0,.55,-.05], [1.03,1.08,.64]);
-  sphere(.3, skinWarm, [0,1.38,.03],[.8,.78,.7]);
-  const head = sphere(1, skin, [0,2.22,.12],[.69,.84,.64],56);
-  sphere(.18, skinWarm, [-.69,2.2,.1],[.55,.78,.38],28);
-  sphere(.18, skinWarm, [.69,2.2,.1],[.55,.78,.38],28);
-
-  sphere(.79, hair,[0,2.58,-.02],[.91,.62,.86],48);
-  const hairLeft=sphere(.56,hair,[-.31,2.66,.22],[.80,.70,.75],42); hairLeft.rotation.z=-.20; hairLeft.rotation.y=.06;
-  const hairRight=sphere(.56,hair,[.31,2.66,.22],[.80,.70,.75],42); hairRight.rotation.z=.20; hairRight.rotation.y=-.06;
-  box([.16,.48,.20],hair,[-.47,2.47,.50],[0,0,-.35]);
-  box([.16,.48,.20],hair,[.47,2.47,.50],[0,0,.35]);
-
-  box([.34,.045,.055],dark,[-.27,2.26,.70],[0,0,-.07]);
-  box([.34,.045,.055],dark,[.27,2.26,.70],[0,0,.07]);
-  const eyeGeo=new THREE.SphereGeometry(.115,24,12);
-  const eyeMat=new THREE.MeshStandardMaterial({color:0x24211f,roughness:.45});
-  const eyeL=shadowify(new THREE.Mesh(eyeGeo,eyeMat)); eyeL.position.set(-.27,2.12,.735); eyeL.scale.set(1,.18,.15); root.add(eyeL);
-  const eyeR=eyeL.clone(); eyeR.position.x=.27; root.add(eyeR);
-  box([.055,.12,.05],skinWarm,[0,2.02,.75],[.12,0,0]);
-  box([.23,.026,.045],new THREE.MeshStandardMaterial({color:0x995e54,roughness:.65}),[0,1.84,.72],[0,0,0]);
-
-  const band=new THREE.Mesh(new THREE.TorusGeometry(.46,.045,14,64,Math.PI*1.48),silver);
-  band.position.set(0,1.28,.31); band.rotation.set(1.32,0,.80); band.castShadow=true; root.add(band);
-  const cupGeo=new THREE.CylinderGeometry(.13,.13,.16,28);
-  const cupL=shadowify(new THREE.Mesh(cupGeo,silver)); cupL.rotation.z=Math.PI/2; cupL.position.set(-.46,1.27,.43); root.add(cupL);
-  const cupR=cupL.clone(); cupR.position.x=.46; root.add(cupR);
-
-  box([4.4,.18,1.42],deskMat,[.58,-.73,1.30],[0,0,0]);
-  box([1.78,.10,.62],keyMat,[.08,-.54,1.67],[-.12,0,0]);
-  for(let r=0;r<3;r++) for(let c=0;c<8;c++) box([.14,.035,.10],shirt2,[-.50+c*.15,-.48,1.48+r*.15],[-.12,0,0]);
-  box([2.18,1.46,.10],dark,[1.70,.55,.93],[0,-.23,0]);
-  const screen=box([1.92,1.20,.025],screenMat,[1.66,.57,.82],[0,-.23,0]);
-  box([.12,.70,.12],silver,[1.66,-.50,.94],[0,-.23,0]);
-  box([.72,.08,.36],silver,[1.68,-.77,.97],[0,-.23,0]);
-  const codeMat=new THREE.MeshStandardMaterial({color:0xb6cab8,emissive:0x6fa077,emissiveIntensity:.72,roughness:.35});
-  const codeAccent=new THREE.MeshStandardMaterial({color:0xe08b70,emissive:0xa6442d,emissiveIntensity:.5,roughness:.35});
-  for(let i=0;i<6;i++){
-    const w=[.92,.62,.78,1.04,.54,.86][i];
-    const m=box([w,.035,.012],i===0?codeAccent:codeMat,[1.16+w*.05,.94-i*.16,.72],[0,-.23,0]);
-    m.position.x += i%2 ? .18 : .02;
-  }
-
-  function cylinderBetween(a,b,r,mat){
-    const geo=new THREE.CylinderGeometry(r,r,1,28);
-    const mesh=shadowify(new THREE.Mesh(geo,mat)); root.add(mesh);
-    const yAxis=new THREE.Vector3(0,1,0);
-    const update=(from,to)=>{
-      const dir=new THREE.Vector3().subVectors(to,from); const len=dir.length();
-      mesh.position.copy(from).add(to).multiplyScalar(.5); mesh.scale.set(1,len,1);
-      mesh.quaternion.setFromUnitVectors(yAxis,dir.clone().normalize());
+    const shadowify = (mesh) => { mesh.castShadow = true; mesh.receiveShadow = true; return mesh; };
+    const add = (mesh) => { root.add(shadowify(mesh)); return mesh; };
+    const sphere = (radius, material, position, scale = [1, 1, 1], seg = 40) => {
+      const mesh = new THREE.Mesh(new THREE.SphereGeometry(radius, seg, Math.max(20, Math.round(seg / 2))), material);
+      mesh.position.set(...position);
+      mesh.scale.set(...scale);
+      return add(mesh);
     };
-    update(a,b); return {mesh,update};
-  }
-  const shoulderL=new THREE.Vector3(-.75,.98,.18), shoulderR=new THREE.Vector3(.75,.98,.18);
-  const handL=new THREE.Vector3(-.42,-.32,1.56), handR=new THREE.Vector3(.46,-.32,1.58);
-  const armL=cylinderBetween(shoulderL,handL,.16,shirt2); const armR=cylinderBetween(shoulderR,handR,.16,shirt2);
-  const palmL=sphere(.16,skin,handL.toArray(),[1.15,.55,1]); const palmR=sphere(.16,skin,handR.toArray(),[1.15,.55,1]);
+    const box = (size, material, position, rotation = [0, 0, 0]) => {
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(...size), material);
+      mesh.position.set(...position);
+      mesh.rotation.set(...rotation);
+      return add(mesh);
+    };
 
-  box([1.45,1.78,.22],shirt2,[0,.03,-.74],[0,0,0]);
-  const floor=new THREE.Mesh(new THREE.PlaneGeometry(18,18),new THREE.ShadowMaterial({color:0x000000,opacity:.16}));
-  floor.rotation.x=-Math.PI/2; floor.position.y=-.84; floor.receiveShadow=true; scene.add(floor);
+    // Adult proportions: smaller head, longer torso, restrained clay finish.
+    const torso = sphere(1, shirt, [0, 0.50, -0.05], [0.96, 1.18, 0.58], 44);
+    sphere(0.29, clayShadow, [0, 1.40, 0.02], [0.72, 0.92, 0.7], 32);
+    const head = sphere(1, clay, [0, 2.20, 0.10], [0.60, 0.78, 0.56], 56);
+    sphere(0.16, clayShadow, [-0.60, 2.19, 0.09], [0.52, 0.78, 0.40], 26);
+    sphere(0.16, clayShadow, [0.60, 2.19, 0.09], [0.52, 0.78, 0.40], 26);
 
-  const hemi=new THREE.HemisphereLight(0xfff7e9,0x6d716b,2.1); scene.add(hemi);
-  const key=new THREE.DirectionalLight(0xffead9,4.1); key.position.set(-4,7,6); key.castShadow=true; key.shadow.mapSize.set(1024,1024); key.shadow.bias=-.0005; scene.add(key);
-  const rim=new THREE.DirectionalLight(0xb7c8cb,2.5); rim.position.set(5,2,-2); scene.add(rim);
-  const warm=new THREE.PointLight(0xd65f3d,9,7); warm.position.set(-2,.5,3.4); scene.add(warm);
+    // Middle-part hair, shaped to read as a sculpted hairstyle rather than a cartoon cap.
+    sphere(0.68, hair, [0, 2.58, -0.03], [0.88, 0.54, 0.82], 46);
+    const leftHair = sphere(0.52, hair, [-0.28, 2.61, 0.20], [0.72, 0.70, 0.70], 42);
+    leftHair.rotation.z = -0.18;
+    const rightHair = sphere(0.52, hair, [0.28, 2.61, 0.20], [0.72, 0.70, 0.70], 42);
+    rightHair.rotation.z = 0.18;
+    box([0.13, 0.42, 0.18], hair, [-0.43, 2.43, 0.45], [0, 0, -0.28]);
+    box([0.13, 0.42, 0.18], hair, [0.43, 2.43, 0.45], [0, 0, 0.28]);
 
-  const pointer={x:0,y:0,tx:0,ty:0};
-  if (finePointer && !reduceMotion) {
-    mount.addEventListener('pointermove',(e)=>{
-      const r=mount.getBoundingClientRect(); pointer.tx=((e.clientX-r.left)/r.width-.5)*2; pointer.ty=((e.clientY-r.top)/r.height-.5)*2;
-    },{passive:true});
-    mount.addEventListener('pointerleave',()=>{pointer.tx=0;pointer.ty=0});
-  }
+    // Sword-like brows and monolid eyes.
+    box([0.30, 0.038, 0.048], charcoal, [-0.245, 2.27, 0.635], [0, 0, -0.11]);
+    box([0.30, 0.038, 0.048], charcoal, [0.245, 2.27, 0.635], [0, 0, 0.11]);
+    const eyeGeo = new THREE.SphereGeometry(0.105, 24, 12);
+    const eyeMat = new THREE.MeshStandardMaterial({ color: 0x23241f, roughness: 0.48 });
+    const eyeL = add(new THREE.Mesh(eyeGeo, eyeMat)); eyeL.position.set(-0.24, 2.13, 0.658); eyeL.scale.set(1, 0.15, 0.12);
+    const eyeR = eyeL.clone(); eyeR.position.x = 0.24; root.add(eyeR);
+    box([0.045, 0.13, 0.042], clayShadow, [0, 2.03, 0.662], [0.1, 0, 0]);
+    box([0.20, 0.018, 0.04], new THREE.MeshStandardMaterial({ color: 0x8d6f66, roughness: 0.72 }), [0, 1.86, 0.647]);
 
-  function resize(){
-    const r=mount.getBoundingClientRect(); const w=Math.max(1,r.width),h=Math.max(1,r.height);
-    renderer.setSize(w,h,false); camera.aspect=w/h; camera.updateProjectionMatrix();
-    const mobile=w<560; root.scale.setScalar(mobile?.78:(w<760?.9:1)); camera.position.z=mobile?8.5:7.6; camera.position.y=mobile?1.2:1.35;
-  }
-  resize(); new ResizeObserver(resize).observe(mount);
-  fallback?.classList.add('hidden');
+    // Silver headphones resting around the neck.
+    const band = add(new THREE.Mesh(new THREE.TorusGeometry(0.43, 0.038, 16, 72, Math.PI * 1.48), silver));
+    band.position.set(0, 1.31, 0.28); band.rotation.set(1.32, 0, 0.80);
+    const cupGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.14, 28);
+    const cupL = add(new THREE.Mesh(cupGeo, silver)); cupL.rotation.z = Math.PI / 2; cupL.position.set(-0.43, 1.29, 0.41);
+    const cupR = cupL.clone(); cupR.position.x = 0.43; root.add(cupR);
 
-  let last=performance.now();
-  function render(now){
-    const dt=Math.min(.04,(now-last)/1000); last=now; const t=now*.001;
-    pointer.x+=(pointer.tx-pointer.x)*Math.min(1,dt*5.5); pointer.y+=(pointer.ty-pointer.y)*Math.min(1,dt*5.5);
-    if(!reduceMotion){
-      root.rotation.y=-.18+pointer.x*.11; root.rotation.x=pointer.y*.045;
-      head.rotation.y=pointer.x*.07; head.rotation.x=-pointer.y*.035;
-      const tap=Math.sin(t*8.6); const tap2=Math.sin(t*8.6+Math.PI);
-      const lEnd=new THREE.Vector3(-.42,-.32+tap*.035,1.56+Math.cos(t*8.6)*.018);
-      const rEnd=new THREE.Vector3(.46,-.32+tap2*.035,1.58+Math.cos(t*8.6+Math.PI)*.018);
-      armL.update(shoulderL,lEnd); armR.update(shoulderR,rEnd); palmL.position.copy(lEnd); palmR.position.copy(rEnd);
-      torso.scale.y=1.08+Math.sin(t*1.6)*.008;
-      const blink=(t%5.2)>4.93; eyeL.scale.y=blink?.035:.18; eyeR.scale.y=blink?.035:.18;
-      screen.material.emissiveIntensity=.48+Math.sin(t*2.4)*.06;
+    // Desk, keyboard and monitor form a restrained studio scene.
+    box([4.25, 0.17, 1.34], wood, [0.55, -0.72, 1.24]);
+    box([1.72, 0.08, 0.58], keyboardMat, [0.06, -0.53, 1.55], [-0.11, 0, 0]);
+    for (let r = 0; r < 3; r++) for (let c = 0; c < 8; c++) {
+      box([0.13, 0.026, 0.09], shirtSoft, [-0.48 + c * 0.145, -0.48, 1.39 + r * 0.14], [-0.11, 0, 0]);
     }
-    renderer.render(scene,camera); requestAnimationFrame(render);
+    box([2.05, 1.38, 0.09], silver, [1.62, 0.55, 0.86], [0, -0.22, 0]);
+    const screen = box([1.82, 1.15, 0.025], screenMat, [1.58, 0.56, 0.76], [0, -0.22, 0]);
+    box([0.10, 0.68, 0.10], silver, [1.58, -0.48, 0.91], [0, -0.22, 0]);
+    box([0.66, 0.07, 0.34], silver, [1.60, -0.75, 0.95], [0, -0.22, 0]);
+    for (let i = 0; i < 6; i++) {
+      const width = [0.82, 0.54, 0.70, 0.94, 0.48, 0.76][i];
+      const line = box([width, 0.028, 0.011], i === 0 ? codeWarm : codeMat, [1.08 + width * 0.07, 0.90 - i * 0.15, 0.675], [0, -0.22, 0]);
+      if (i % 2) line.position.x += 0.16;
+    }
+
+    function cylinderBetween(from, to, radius, material) {
+      const mesh = add(new THREE.Mesh(new THREE.CylinderGeometry(radius, radius, 1, 28), material));
+      const up = new THREE.Vector3(0, 1, 0);
+      const update = (a, b) => {
+        const direction = new THREE.Vector3().subVectors(b, a);
+        mesh.position.copy(a).add(b).multiplyScalar(0.5);
+        mesh.scale.set(1, direction.length(), 1);
+        mesh.quaternion.setFromUnitVectors(up, direction.clone().normalize());
+      };
+      update(from, to);
+      return { mesh, update };
+    }
+
+    const shoulderL = new THREE.Vector3(-0.69, 1.03, 0.16);
+    const shoulderR = new THREE.Vector3(0.69, 1.03, 0.16);
+    const restL = new THREE.Vector3(-0.40, -0.29, 1.48);
+    const restR = new THREE.Vector3(0.44, -0.29, 1.50);
+    const armL = cylinderBetween(shoulderL, restL, 0.145, shirtSoft);
+    const armR = cylinderBetween(shoulderR, restR, 0.145, shirtSoft);
+    const palmL = sphere(0.14, clay, restL.toArray(), [1.15, 0.52, 0.90], 28);
+    const palmR = sphere(0.14, clay, restR.toArray(), [1.15, 0.52, 0.90], 28);
+
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(16, 16), new THREE.ShadowMaterial({ color: 0x000000, opacity: 0.11 }));
+    floor.rotation.x = -Math.PI / 2; floor.position.y = -0.83; floor.receiveShadow = true; scene.add(floor);
+
+    const hemi = new THREE.HemisphereLight(0xfffbf2, 0x74766f, 2.2); scene.add(hemi);
+    const key = new THREE.DirectionalLight(0xfff2e7, 4.0); key.position.set(-4.5, 7, 5.5); key.castShadow = true; key.shadow.mapSize.set(1024, 1024); key.shadow.bias = -0.0004; scene.add(key);
+    const fill = new THREE.DirectionalLight(0xc9d1cc, 2.1); fill.position.set(4.5, 3, 1); scene.add(fill);
+    const rim = new THREE.PointLight(0xc7d0ca, 5, 8); rim.position.set(-2.8, 2.5, -2.0); scene.add(rim);
+
+    const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
+    if (finePointer && !reduceMotion) {
+      mount.addEventListener('pointermove', (event) => {
+        const rect = mount.getBoundingClientRect();
+        pointer.tx = ((event.clientX - rect.left) / rect.width - 0.5) * 2;
+        pointer.ty = ((event.clientY - rect.top) / rect.height - 0.5) * 2;
+      }, { passive: true });
+      mount.addEventListener('pointerleave', () => { pointer.tx = 0; pointer.ty = 0; });
+    }
+
+    const resize = () => {
+      const rect = mount.getBoundingClientRect();
+      const width = Math.max(1, rect.width), height = Math.max(1, rect.height);
+      renderer.setSize(width, height, false);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      const mobile = width < 560;
+      root.scale.setScalar(mobile ? 0.78 : width < 760 ? 0.9 : 1);
+      camera.position.z = mobile ? 8.5 : 7.7;
+      camera.position.y = mobile ? 1.18 : 1.25;
+    };
+    resize();
+    new ResizeObserver(resize).observe(mount);
+    fallback?.classList.add('hidden');
+
+    let last = performance.now();
+    const render = (now) => {
+      const dt = Math.min(0.04, (now - last) / 1000); last = now;
+      const t = now * 0.001;
+      pointer.x += (pointer.tx - pointer.x) * Math.min(1, dt * 5);
+      pointer.y += (pointer.ty - pointer.y) * Math.min(1, dt * 5);
+
+      if (!reduceMotion) {
+        root.rotation.y = -0.15 + pointer.x * 0.09;
+        root.rotation.x = pointer.y * 0.035;
+        head.rotation.y = pointer.x * 0.055;
+        head.rotation.x = -pointer.y * 0.028;
+        const tapL = Math.sin(t * 8.2);
+        const tapR = Math.sin(t * 8.2 + Math.PI);
+        const left = new THREE.Vector3(-0.40, -0.29 + tapL * 0.026, 1.48 + Math.cos(t * 8.2) * 0.012);
+        const right = new THREE.Vector3(0.44, -0.29 + tapR * 0.026, 1.50 + Math.cos(t * 8.2 + Math.PI) * 0.012);
+        armL.update(shoulderL, left); armR.update(shoulderR, right);
+        palmL.position.copy(left); palmR.position.copy(right);
+        torso.scale.y = 1.18 + Math.sin(t * 1.55) * 0.006;
+        const blinking = (t % 5.6) > 5.34;
+        eyeL.scale.y = blinking ? 0.025 : 0.15;
+        eyeR.scale.y = blinking ? 0.025 : 0.15;
+        screen.material.emissiveIntensity = 0.43 + Math.sin(t * 2.0) * 0.04;
+      }
+      renderer.render(scene, camera);
+      requestAnimationFrame(render);
+    };
+    requestAnimationFrame(render);
+  } catch (error) {
+    console.warn('3D portrait unavailable', error);
+    fallback?.querySelector('small')?.replaceChildren(document.createTextNode('3D portrait unavailable'));
   }
-  requestAnimationFrame(render);
-} catch (err) {
-  console.warn('3D scene unavailable', err);
-  fallback?.querySelector('small')?.replaceChildren(document.createTextNode('3D scene unavailable'));
 }
