@@ -3,159 +3,107 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#f5f3ee" />
-  <meta name="description" content="Jiawei Wang — Algorithm Research, AI Systems and Full-Stack Engineering." />
+  <meta name="theme-color" content="#0a0b0a" />
+  <meta name="description" content="Jiawei Wang — algorithm research, AI systems and full-stack engineering." />
   <title>Jiawei Wang — Research & Systems</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="./portfolio.css" />
 </head>
 <body>
+  <div class="ambient-grid" aria-hidden="true"></div>
+
   <header class="topbar" id="top">
-    <a class="identity" href="#top">Jiawei Wang</a>
-    <nav class="nav" aria-label="Primary navigation">
+    <a class="identity" href="#top" aria-label="Jiawei Wang home">
+      <span class="identity-dot" aria-hidden="true"></span>
+      <span>Jiawei Wang</span>
+    </a>
+    <nav class="nav" aria-label="Primary">
       <a href="#focus">Focus</a>
       <a href="#work">Work</a>
       <a href="#stack">Stack</a>
-      <a href="https://github.com/jiaweine" target="_blank" rel="noreferrer">GitHub</a>
+      <a href="https://github.com/jiaweine" target="_blank" rel="noreferrer">GitHub ↗</a>
     </nav>
   </header>
 
   <main>
-    <section class="hero section-shell" aria-labelledby="hero-name">
+    <section class="hero" aria-labelledby="hero-title">
       <div class="hero-copy">
-        <p class="eyebrow reveal">ALGORITHM RESEARCH · AI SYSTEMS · FULL-STACK ENGINEERING</p>
-        <h1 id="hero-name" class="hero-name reveal">Jiawei<br>Wang</h1>
-        <p class="hero-line reveal">I make algorithms leave the notebook — and build the systems that make them survive reality.</p>
-        <div class="hero-links reveal">
-          <a href="#work">Selected work</a>
-          <a href="https://doi.org/10.1016/j.ins.2026.123925" target="_blank" rel="noreferrer">Information Sciences · 2026</a>
+        <div class="eyebrow reveal">
+          <span class="signal"></span>
+          <span>Research engineer · AI systems · full-stack</span>
+        </div>
+        <h1 id="hero-title" class="display reveal">I turn research<br /><span>into systems.</span></h1>
+        <p class="hero-summary reveal">Multimodal learning, search and recommendation, agent post-training, and the evaluation harnesses that make intelligent systems measurable, recoverable, and useful.</p>
+        <div class="hero-actions reveal">
+          <a class="primary-link" href="#work">Explore selected work <span>↘</span></a>
+          <a class="secondary-link" href="https://github.com/jiaweine" target="_blank" rel="noreferrer">github.com/jiaweine</a>
         </div>
       </div>
 
-      <div class="hero-stage reveal">
-        <div class="stage-caption"><span>INTERACTIVE PORTRAIT</span><span>WEBGL / PROCEDURAL 3D</span></div>
-        <div id="avatar3d" class="avatar3d" aria-label="Interactive 3D portrait of Jiawei coding"></div>
-        <div id="sceneFallback" class="scene-fallback" aria-hidden="true">
-          <div class="fallback-silhouette"></div>
-          <small>loading 3D portrait</small>
-        </div>
-        <div class="stage-foot"><span>SCULPTURAL STUDY</span><span>POINTER PARALLAX</span></div>
+      <div class="hero-stage reveal" aria-label="Interactive 3D portrait of Jiawei Wang">
+        <div class="stage-frame" aria-hidden="true"><span class="corner corner-a"></span><span class="corner corner-b"></span><span class="corner corner-c"></span><span class="corner corner-d"></span></div>
+        <div class="scene-topline"><span>DIGITAL PORTRAIT / THREE.JS</span><span>REALTIME · WEBGL</span></div>
+        <div id="avatar3d" class="avatar3d"></div>
+        <div id="sceneFallback" class="scene-fallback" aria-hidden="true"><strong>JW</strong><span>Loading realtime portrait</span></div>
+        <div class="scene-foot"><span>pointer → gaze</span><span>scroll → camera</span></div>
       </div>
 
-      <div class="hero-focus reveal" aria-label="Current focus">
-        <div><b>01</b><span>Multimodal AI</span></div>
-        <div><b>02</b><span>Search, Ads & Recommendation</span></div>
-        <div><b>03</b><span>Agent Post-Training</span></div>
-        <div><b>04</b><span>Harness Engineering</span></div>
-      </div>
+      <aside class="hero-rail reveal" aria-label="Current research directions">
+        <div class="rail-head"><span>NOW / 2026</span><span>SGT +08</span></div>
+        <ol>
+          <li><b>01</b><span>Multimodal AI</span></li>
+          <li><b>02</b><span>Search, Ads & Recommendation</span></li>
+          <li><b>03</b><span>Agent Post-Training</span></li>
+          <li><b>04</b><span>Harness Engineering</span></li>
+        </ol>
+      </aside>
+
+      <div class="hero-footer reveal"><span>JIAWEI WANG · 王嘉伟</span><span>Researcher when the loss converges. Engineer when it doesn’t.</span></div>
     </section>
 
-    <section class="manifesto section-shell reveal">
-      <span class="section-index">00 / MANIFESTO</span>
-      <p>Research is most interesting when it becomes <em>observable</em>, <em>testable</em>, and useful enough to expose the next hard question.</p>
+    <section class="statement section-shell reveal">
+      <span class="section-index">00 / POINT OF VIEW</span>
+      <p>Good research survives contact with <em>real data</em>, repeated evaluation, and systems that have to work on the second run.</p>
     </section>
 
-    <section id="focus" class="section-shell focus-section">
-      <header class="section-head reveal">
-        <div><span class="section-index">01 / CURRENT FOCUS</span><h2>What I keep<br>coming back to.</h2></div>
-        <p>Four directions connected by the same loop: learn from behavior, measure what matters, improve the system, repeat.</p>
-      </header>
-
-      <div class="focus-composition">
-        <article class="focus-card focus-large reveal">
-          <span class="card-no">01</span>
-          <small>RESEARCH</small>
-          <h3>Multimodal AI</h3>
-          <p>Representation learning, heterogeneous data, multimodal reasoning, fusion, and agents that can work across modalities.</p>
-          <div class="quiet-tags"><span>representation</span><span>reasoning</span><span>fusion</span></div>
-        </article>
-
-        <article class="focus-card reveal">
-          <span class="card-no">02</span>
-          <small>SEARCH SYSTEMS</small>
-          <h3>Search, Ads & Recommendation</h3>
-          <p>Retrieval, ranking, relevance, recommendation, evaluation, and autonomous optimization.</p>
-          <div class="quiet-tags"><span>retrieval</span><span>ranking</span><span>evaluation</span></div>
-        </article>
-
-        <article class="focus-card reveal">
-          <span class="card-no">03</span>
-          <small>AGENT TRAINING</small>
-          <h3>Agent Post-Training</h3>
-          <p>Trajectory curation, reward signals, preference optimization, evaluation, and capability iteration.</p>
-          <div class="quiet-tags"><span>trajectory</span><span>reward</span><span>iteration</span></div>
-        </article>
-
-        <article class="focus-card focus-wide reveal">
-          <span class="card-no">04</span>
-          <small>AGENT SYSTEMS</small>
-          <h3>Harness Engineering</h3>
-          <p>Evaluation harnesses, runtimes, tool orchestration, state, recovery, verification, and the infrastructure around reliable agents.</p>
-          <div class="quiet-tags"><span>runtime</span><span>tools</span><span>recovery</span><span>verification</span></div>
-        </article>
-      </div>
-    </section>
-
-    <section id="work" class="work-section">
-      <div class="section-shell">
-        <header class="section-head reveal">
-          <div><span class="section-index">02 / SELECTED WORK</span><h2>Work with<br>consequences.</h2></div>
-          <p>Projects where algorithmic ideas meet evaluation, interfaces, runtime behavior, and real execution.</p>
-        </header>
-
-        <div class="project-grid">
-          <a class="project-card project-feature reveal" href="https://github.com/jiaweine/KAMEL" target="_blank" rel="noreferrer">
-            <div class="project-top"><span>01 / RESEARCH · MULTIMODAL</span><span>VIEW</span></div>
-            <div class="project-body"><h3>KAMEL</h3><p>KAN-Augmented Multimodal Expert Learning for heterogeneous and imbalanced tabular data.</p></div>
-            <div class="project-meta"><span>Information Sciences · 2026</span><span>25 benchmark datasets</span><span>KAN · MoE · PyTorch</span></div>
-          </a>
-
-          <a class="project-card reveal" href="https://github.com/jiaweine/recsys-harness" target="_blank" rel="noreferrer">
-            <div class="project-top"><span>02 / SEARCH · RECOMMENDATION</span><span>VIEW</span></div>
-            <div class="project-body"><h3>Recsys Harness</h3><p>An autonomous workbench for diagnosis, experimentation, evaluation, execution, and verification.</p></div>
-            <div class="project-meta"><span>Evidence-first</span><span>Recoverable runtime</span></div>
-          </a>
-
-          <a class="project-card reveal" href="https://github.com/jiaweine/EcomEvo-Harness" target="_blank" rel="noreferrer">
-            <div class="project-top"><span>03 / MULTIMODAL · FULL-STACK</span><span>VIEW</span></div>
-            <div class="project-body"><h3>EcomEvo</h3><p>A multimodal AI workbench for business decisions and auditable task execution.</p></div>
-            <div class="project-meta"><span>Human confirmation</span><span>Visible evidence</span></div>
-          </a>
-
-          <a class="project-card project-wide reveal" href="https://github.com/jiaweine/lingjing-game-studio" target="_blank" rel="noreferrer">
-            <div class="project-top"><span>04 / AGENTS · VERIFICATION</span><span>VIEW</span></div>
-            <div class="project-body"><h3>Lingjing · 灵境</h3><p>A controllable and verifiable AI execution workbench for game development and long-running multimodal tasks.</p></div>
-            <div class="project-meta"><span>Recovery</span><span>Verification</span><span>Reliable delivery</span></div>
-          </a>
+    <section id="focus" class="focus section-shell">
+      <header class="section-head reveal"><div><span class="section-index">01 / CURRENT FOCUS</span><h2>Four directions.<br /><span>One feedback loop.</span></h2></div><p>Better models demand better evaluation. Better harnesses reveal better research questions. The loop is the product.</p></header>
+      <div class="focus-layout">
+        <aside class="focus-aside reveal"><div class="focus-orbit" aria-hidden="true"><i></i><i></i><i></i></div><p>observe<br />evaluate<br />iterate<br />ship</p></aside>
+        <div class="focus-list">
+          <article class="focus-row reveal"><span class="row-no">01</span><div class="row-title"><small>RESEARCH</small><h3>Multimodal AI</h3></div><p>Representation learning, heterogeneous data, multimodal reasoning, fusion, and multimodal agents.</p><div class="row-tags"><span>representation</span><span>reasoning</span><span>fusion</span></div></article>
+          <article class="focus-row reveal"><span class="row-no">02</span><div class="row-title"><small>SEARCH SYSTEMS</small><h3>Search, Ads & Recommendation</h3></div><p>Retrieval, ranking, recommendation, relevance modeling, evaluation, and autonomous optimization.</p><div class="row-tags"><span>retrieval</span><span>ranking</span><span>evaluation</span></div></article>
+          <article class="focus-row reveal"><span class="row-no">03</span><div class="row-title"><small>AGENT TRAINING</small><h3>Agent Post-Training</h3></div><p>Trajectory curation, reward signals, preference optimization, agent evaluation, and capability iteration.</p><div class="row-tags"><span>trajectories</span><span>rewards</span><span>iteration</span></div></article>
+          <article class="focus-row reveal"><span class="row-no">04</span><div class="row-title"><small>AGENT SYSTEMS</small><h3>Harness Engineering</h3></div><p>Evaluation harnesses, runtimes, tool orchestration, state, recovery, and verification.</p><div class="row-tags"><span>runtime</span><span>tools</span><span>recovery</span></div></article>
         </div>
       </div>
     </section>
 
-    <section id="stack" class="section-shell stack-section">
-      <header class="section-head reveal">
-        <div><span class="section-index">03 / FULL-STACK ENGINEERING</span><h2>Follow the problem<br>across the stack.</h2></div>
-        <p>Model behavior, runtime state, interface behavior, and deployment are one system when you are trying to make something reliable.</p>
-      </header>
-
-      <div class="stack-list">
-        <article class="stack-row reveal"><span>MODEL</span><h3>Model & ML</h3><strong>Python · PyTorch</strong><p>Multimodal pipelines · training · evaluation · experiment tooling</p></article>
-        <article class="stack-row reveal"><span>RUNTIME</span><h3>Backend & Agent Systems</h3><strong>FastAPI · APIs</strong><p>Agent runtimes · data systems · tool orchestration · state · recovery</p></article>
-        <article class="stack-row reveal"><span>DELIVERY</span><h3>Frontend & Infra</h3><strong>React · TypeScript</strong><p>Interfaces · Docker · Linux · Git · testing · deployment</p></article>
+    <section id="work" class="work section-shell">
+      <header class="section-head reveal"><div><span class="section-index">02 / SELECTED WORK</span><h2>Ideas with<br /><span>runtime.</span></h2></div><p>Selected work across research, search systems, multimodal agents, and verifiable execution.</p></header>
+      <div class="projects">
+        <a class="project project-feature reveal" href="https://github.com/jiaweine/KAMEL" target="_blank" rel="noreferrer"><span class="project-index">01</span><div class="project-copy"><small>RESEARCH · MULTIMODAL</small><h3>KAMEL</h3><p>KAN-Augmented Multimodal Expert Learning for heterogeneous and imbalanced tabular data.</p></div><div class="project-facts"><span>Information Sciences · 2026</span><span>25 benchmark datasets</span><span>KAN · MoE · PyTorch</span></div><span class="view-label">OPEN ↗</span></a>
+        <a class="project reveal" href="https://github.com/jiaweine/recsys-harness" target="_blank" rel="noreferrer"><span class="project-index">02</span><div class="project-copy"><small>SEARCH · RECOMMENDATION</small><h3>Recsys Harness</h3><p>An autonomous workbench for diagnosis, evaluation, execution, and verification in search and recommendation.</p></div><div class="project-facts"><span>Evidence-first</span><span>Recoverable runtime</span><span>Search · Recommendation · Agents</span></div><span class="view-label">OPEN ↗</span></a>
+        <a class="project reveal" href="https://github.com/jiaweine/EcomEvo-Harness" target="_blank" rel="noreferrer"><span class="project-index">03</span><div class="project-copy"><small>MULTIMODAL · FULL-STACK</small><h3>EcomEvo</h3><p>A multimodal AI workbench for business decisions and auditable task execution.</p></div><div class="project-facts"><span>Human confirmation</span><span>Visible evidence</span><span>FastAPI · Multimodal AI</span></div><span class="view-label">OPEN ↗</span></a>
+        <a class="project reveal" href="https://github.com/jiaweine/lingjing-game-studio" target="_blank" rel="noreferrer"><span class="project-index">04</span><div class="project-copy"><small>AGENTS · VERIFICATION</small><h3>Lingjing · 灵境</h3><p>A controllable, verifiable AI execution workbench for game development and long-running multimodal tasks.</p></div><div class="project-facts"><span>Recovery</span><span>Verification</span><span>Reliable delivery</span></div><span class="view-label">OPEN ↗</span></a>
       </div>
     </section>
 
-    <section class="principle-section">
-      <div class="section-shell reveal">
-        <span class="section-index">04 / ENGINEERING PRINCIPLE</span>
-        <blockquote>Build for the <em>second run</em>, not just the demo.</blockquote>
-        <div class="principle-foot"><p>A prototype proves an idea. A good system keeps working after the demo ends.</p><div><span>Testable</span><span>Traceable</span><span>Recoverable</span><span>Measurable</span><span>Useful</span></div></div>
+    <section id="stack" class="stack section-shell">
+      <header class="section-head reveal"><div><span class="section-index">03 / FULL-STACK ENGINEERING</span><h2>Trace the problem<br /><span>across the stack.</span></h2></div><p>Full-stack means following failure from model behavior to runtime state, interface behavior, and deployment.</p></header>
+      <div class="stack-table">
+        <article class="stack-row reveal"><span class="stack-kind">MODEL</span><h3>Model & ML</h3><strong>Python · PyTorch</strong><p>Multimodal pipelines · training · evaluation · experiment tooling</p></article>
+        <article class="stack-row reveal"><span class="stack-kind">RUNTIME</span><h3>Backend & Agent Systems</h3><strong>FastAPI · APIs</strong><p>Agent runtimes · data systems · tool orchestration · state · recovery</p></article>
+        <article class="stack-row reveal"><span class="stack-kind">DELIVERY</span><h3>Frontend & Infra</h3><strong>React · TypeScript</strong><p>Interfaces · Docker · Linux · Git · testing · deployment</p></article>
       </div>
     </section>
+
+    <section class="principle section-shell reveal"><span class="section-index">04 / ENGINEERING PRINCIPLE</span><blockquote>Build for the <span>second run.</span></blockquote><div class="principle-bottom"><p>A prototype proves an idea. A good system keeps working after the demo ends.</p><div><span>Testable</span><span>Traceable</span><span>Recoverable</span><span>Measurable</span><span>Useful</span></div></div></section>
   </main>
 
-  <footer class="footer section-shell">
-    <div><strong>Jiawei Wang</strong><span>Algorithm Research · AI Systems · Full-Stack Engineering</span></div>
-    <nav><a href="https://github.com/jiaweine" target="_blank" rel="noreferrer">GitHub</a><a href="https://doi.org/10.1016/j.ins.2026.123925" target="_blank" rel="noreferrer">Paper</a><a href="#top">Top</a></nav>
-  </footer>
+  <footer class="footer section-shell"><div><strong>Jiawei Wang</strong><span>Algorithm Research · AI Systems · Full-Stack Engineering</span></div><nav><a href="https://github.com/jiaweine" target="_blank" rel="noreferrer">GitHub ↗</a><a href="https://doi.org/10.1016/j.ins.2026.123925" target="_blank" rel="noreferrer">Paper ↗</a><a href="#top">Top ↑</a></nav></footer>
 
   <script src="./portfolio.js"></script>
   <script type="module" src="./scene.js"></script>
