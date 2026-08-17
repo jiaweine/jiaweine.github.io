@@ -40,9 +40,11 @@ jobs:
       - name: Resize source textures
         run: |
           for f in /tmp/rocketbox/*.tga; do
-            convert "$f" -resize '1024x1024>' "$f.tmp.tga"
-            mv "$f.tmp.tga" "$f"
+            out="${f%.tga}.small.tga"
+            convert "$f" -resize '1024x1024>' "tga:$out"
+            mv "$out" "$f"
           done
+          identify /tmp/rocketbox/*.tga | head
       - name: Convert FBX to web GLB
         run: |
           cat > /tmp/export_rocketbox.py <<'PY'
