@@ -18,13 +18,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: agent/high-fidelity-3d-redesign-v2
-      - name: Install Blender and ImageMagick
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y blender imagemagick
-          blender --version | tee /tmp/blender-version.txt
+      - name: Set up Blender 3.6
+        uses: moguri/setup-blender@v1
+        with:
+          blender-version: '3.6'
       - name: Download Microsoft Rocketbox Asian male source
         run: |
+          blender --version | tee /tmp/blender-version.txt
           mkdir -p /tmp/rocketbox assets
           BASE='https://raw.githubusercontent.com/microsoft/Microsoft-Rocketbox/master/Assets/Avatars/Adults/Male_Adult_10'
           curl -L --fail "$BASE/Export/Male_Adult_10_facial.fbx" -o /tmp/rocketbox/Male_Adult_10_facial.fbx
@@ -38,15 +38,8 @@ jobs:
             m024_opacity_color.tga; do
             curl -L --fail "$BASE/Textures/$file" -o "/tmp/rocketbox/$file"
           done
-      - name: Resize source textures
-        run: |
-          for f in /tmp/rocketbox/*.tga; do
-            out="${f%.tga}.small.tga"
-            convert "$f" -resize '1024x1024>' "tga:$out"
-            mv "$out" "$f"
-          done
-          identify /tmp/rocketbox/*.tga | tee /tmp/texture-info.txt
-      - name: Convert FBX to web GLB
+          du -h /tmp/rocketbox/* | tee /tmp/source-info.txt
+      - name: Convert FBX to optimized web GLB
         id: convert
         shell: bash
         run: |
@@ -54,20 +47,27 @@ jobs:
           import bpy, os, traceback
           src='/tmp/rocketbox/Male_Adult_10_facial.fbx'
           out=os.path.abspath('assets/rocketbox-male10.glb')
-          print('BLENDER', bpy.app.version_string)
-          print('IMPORT_OP', bpy.ops.import_scene.fbx)
-          print('EXPORT_OP', bpy.ops.export_scene.gltf)
           try:
               bpy.ops.wm.read_factory_settings(use_empty=True)
+              print('BLENDER', bpy.app.version_string)
               result=bpy.ops.import_scene.fbx(filepath=src, use_image_search=True)
               print('IMPORT_RESULT', result)
-              print('OBJECTS', [(o.name, o.type) for o in bpy.context.scene.objects])
-              print('IMAGES', [(i.name, i.filepath, tuple(i.size)) for i in bpy.data.images])
+              print('OBJECTS')
+              for o in bpy.context.scene.objects:
+                  print(' ', o.name, o.type, tuple(round(v,4) for v in o.dimensions))
+              print('IMAGES_BEFORE')
+              for img in bpy.data.images:
+                  print(' ', img.name, img.filepath, tuple(img.size))
+                  if img.size[0] > 1024 or img.size[1] > 1024:
+                      factor=min(1024/img.size[0],1024/img.size[1])
+                      img.scale(max(1,int(img.size[0]*factor)),max(1,int(img.size[1]*factor)))
+              print('IMAGES_AFTER', [(i.name, tuple(i.size)) for i in bpy.data.images])
               result=bpy.ops.export_scene.gltf(
                   filepath=out,
                   export_format='GLB',
                   export_yup=True,
-                  export_animations=False
+                  export_animations=False,
+                  export_apply=True
               )
               print('EXPORT_RESULT', result)
               print('WROTE', out, os.path.getsize(out))
@@ -80,10 +80,7 @@ jobs:
           status=$?
           set -e
           cat /tmp/blender.log
-          if [ $status -ne 0 ]; then
-            echo "Blender conversion failed with $status"
-            exit $status
-          fi
+          if [ $status -ne 0 ]; then exit $status; fi
           ls -lh assets/rocketbox-male10.glb | tee /tmp/output-info.txt
       - name: Upload conversion diagnostics
         if: always()
@@ -93,7 +90,7 @@ jobs:
           path: |
             /tmp/blender.log
             /tmp/blender-version.txt
-            /tmp/texture-info.txt
+            /tmp/source-info.txt
             /tmp/output-info.txt
           if-no-files-found: ignore
       - name: Add attribution
