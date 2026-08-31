@@ -79,6 +79,7 @@
 
   if (finePointer && !reduceMotion) {
     hero.addEventListener('pointermove', (event) => {
+      if (stage.classList.contains('video-avatar-active')) return;
       const r = stage.getBoundingClientRect();
       const cx = r.left + r.width / 2;
       const cy = r.top + r.height / 2;
@@ -106,7 +107,7 @@
 
   const tick = (now) => {
     requestAnimationFrame(tick);
-    if (document.hidden || !visible || reduceMotion) {
+    if (document.hidden || !visible || reduceMotion || stage.classList.contains('video-avatar-active')) {
       state.last = now;
       return;
     }
@@ -129,4 +130,15 @@
   };
 
   requestAnimationFrame(tick);
+
+  // Video-first enhancement: when avatar.webm / avatar.mp4 exists, it replaces
+  // the five-view rig automatically. Until then the multiview system remains live.
+  if (!document.querySelector('link[data-video-avatar-style]')) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = './video-avatar.css?v=video-hybrid-1';
+    link.dataset.videoAvatarStyle = '1';
+    document.head.appendChild(link);
+  }
+  import('./video-avatar.js?v=video-hybrid-1').catch(() => {});
 })();
