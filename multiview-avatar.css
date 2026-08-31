@@ -1,0 +1,37 @@
+.avatar-stage.avatar-multiview{
+  --mv-x:0;
+  --mv-y:0;
+  --mv-angle:0;
+  isolation:isolate;
+  perspective:1200px;
+  background:
+    radial-gradient(circle at calc(50% + var(--mv-x) * 14%) calc(36% + var(--mv-y) * 10%),rgba(160,219,240,.11),transparent 30%),
+    linear-gradient(155deg,#0d141b,#081018 58%,#101a23);
+}
+.avatar-stage.avatar-multiview .avatar-canvas,
+.avatar-stage.avatar-multiview .avatar-fallback{display:none!important}
+.mv-rig{position:absolute;inset:0;z-index:3;overflow:hidden;transform-style:preserve-3d;transform:translate3d(calc(var(--mv-x) * 5px),calc(var(--mv-y) * 3px),0) rotateY(calc(var(--mv-x) * 1.1deg)) rotateX(calc(var(--mv-y) * -.55deg));transform-origin:50% 44%;will-change:transform}
+.mv-rig::before{content:"";position:absolute;inset:-8%;z-index:8;pointer-events:none;background:radial-gradient(circle at calc(50% + var(--mv-x) * 18%) calc(31% + var(--mv-y) * 10%),rgba(214,245,255,.13),transparent 28%),linear-gradient(105deg,transparent 36%,rgba(205,238,249,.055) 49%,transparent 61%);mix-blend-mode:screen;transform:translate3d(calc(var(--mv-x) * 7px),calc(var(--mv-y) * 4px),35px)}
+.mv-rig::after{content:"";position:absolute;inset:0;z-index:7;pointer-events:none;background:linear-gradient(180deg,rgba(5,9,13,.02),transparent 45%,rgba(5,9,13,.24)),radial-gradient(ellipse at 50% 55%,transparent 46%,rgba(5,9,13,.16) 86%)}
+.mv-view{position:absolute;inset:-1.5%;opacity:0;transform:scale(1.025);transition:opacity .17s ease,transform .45s cubic-bezier(.16,1,.3,1),filter .25s ease;background-repeat:no-repeat;will-change:opacity,transform;filter:saturate(.92) contrast(1.025) brightness(.9)}
+.mv-view.is-active{opacity:1;transform:scale(1.018)}
+.mv-view[data-view="front"]{background-image:url('./assets/digital-human.webp?v=multiview-1');background-size:cover;background-position:center}
+.mv-view[data-sprite]{background-image:url('./assets/views/avatar-views.webp?v=multiview-1');background-size:auto 100%;background-position:var(--frame-pos) 50%}
+.mv-view[data-view="left-profile"]{--frame-pos:66.666%}
+.mv-view[data-view="left-45"]{--frame-pos:0%}
+.mv-view[data-view="right-45"]{--frame-pos:33.333%}
+.mv-view[data-view="right-profile"]{--frame-pos:100%}
+.mv-depth-halo{position:absolute;z-index:1;left:50%;top:44%;width:76%;aspect-ratio:1;border-radius:50%;border:1px solid rgba(168,216,232,.1);transform:translate(-50%,-50%) rotate(calc(-12deg + var(--mv-x) * 9deg)) scale(calc(1 + (var(--mv-x) * var(--mv-x)) * .045));box-shadow:0 0 80px rgba(113,190,216,.045),inset 0 0 55px rgba(113,190,216,.03);transition:transform .25s ease;pointer-events:none}
+.mv-depth-halo::before,.mv-depth-halo::after{content:"";position:absolute;inset:12%;border-radius:50%;border:1px solid rgba(168,216,232,.055)}
+.mv-depth-halo::after{inset:24%;border-style:dashed;animation:mvSpin 18s linear infinite}
+.mv-angle-meter{position:absolute;z-index:9;left:50%;bottom:22px;transform:translateX(-50%);width:min(78%,390px);pointer-events:none;font:700 8px/1 var(--mono);letter-spacing:.08em;color:rgba(198,220,230,.54)}
+.mv-angle-track{position:relative;height:22px;border-top:1px solid rgba(181,215,229,.17);background:repeating-linear-gradient(90deg,rgba(181,215,229,.16) 0 1px,transparent 1px 12.5%)}
+.mv-angle-track::after{content:"";position:absolute;top:-4px;left:calc(50% + var(--mv-angle) * .5%);width:1px;height:16px;background:var(--cyan-strong);box-shadow:0 0 12px rgba(215,243,255,.45);transition:left .08s linear}
+.mv-angle-labels{display:flex;justify-content:space-between;margin-top:3px}.mv-angle-readout{position:absolute;left:50%;top:-18px;transform:translateX(-50%);color:var(--cyan-strong);min-width:58px;text-align:center}
+.avatar-stage.avatar-multiview .live-chip{background:rgba(5,9,13,.62)}
+.avatar-stage.avatar-multiview .avatar-orbit{z-index:2;opacity:.62}
+.avatar-stage.avatar-multiview .avatar-reticle{z-index:10}
+.avatar-stage.avatar-multiview.is-tracking{box-shadow:0 34px 100px rgba(0,0,0,.38),0 0 0 1px rgba(168,216,232,.05),inset 0 0 90px rgba(91,147,169,.05)}
+@keyframes mvSpin{to{transform:rotate(360deg)}}
+@media(max-width:900px){.mv-angle-meter{width:74%;bottom:18px}.mv-rig{transform:translate3d(calc(var(--mv-x) * 2px),calc(var(--mv-y) * 2px),0)}}
+@media(prefers-reduced-motion:reduce){.mv-rig,.mv-depth-halo,.mv-angle-track::after{transform:none!important;transition:none!important}.mv-depth-halo::after{animation:none}.mv-view:not([data-view="front"]){display:none}.mv-view[data-view="front"]{opacity:1!important}}
