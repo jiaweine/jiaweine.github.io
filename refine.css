@@ -1,7 +1,0 @@
-.nav a.active:not(.nav-cta){background:rgba(255,255,255,.62);color:var(--ink)}
-.project-action{justify-self:end;min-width:52px;height:32px;border-radius:999px;border:1px solid rgba(255,255,255,.16);display:grid;place-items:center;padding:0 10px;font-size:9px;font-weight:800;letter-spacing:.12em;color:#aaa29a;transition:background .25s ease,color .25s ease,border-color .25s ease}
-.project:hover .project-action{background:#f4eee6;color:#262321;border-color:#f4eee6}
-.focus-card.pressed,.stack-card.pressed,.project.pressed{transform:scale(.992)}
-.scene{background-image:radial-gradient(circle at var(--mx,72%) var(--my,28%),rgba(255,255,255,.48),transparent 24%),linear-gradient(145deg,rgba(255,254,251,.84),rgba(231,223,211,.72))}
-.card-icon{font-family:Georgia,"Times New Roman",serif;font-weight:400}
-@media (max-width:720px){.project-action{grid-column:3;grid-row:1/3;align-self:center}.visual-note{margin-inline:4px}.hero-actions .button{flex:1;min-width:170px}}
