@@ -1,36 +1,68 @@
 .avatar-stage.avatar-safe-25d{
   --px:0;
   --py:0;
-  --depth-x:0;
-  --depth-y:0;
-  perspective:1100px;
+  --lx:0;
+  --ly:0;
+  --attention:0;
+  --speed:0;
+  --breath:0;
+  --scroll-depth:0;
+  perspective:1200px;
   transform-style:preserve-3d;
+  contain:layout paint style;
 }
 .avatar-stage.avatar-safe-25d .avatar-canvas{display:none!important}
 .avatar-stage.avatar-safe-25d .avatar-fallback{display:none!important}
 .avatar-stage.avatar-safe-25d .avatar-depth-back,
-.avatar-stage.avatar-safe-25d .avatar-photo-wrap{
+.avatar-stage.avatar-safe-25d .avatar-depth-aura,
+.avatar-stage.avatar-safe-25d .avatar-photo-wrap,
+.avatar-stage.avatar-safe-25d .avatar-light-field,
+.avatar-stage.avatar-safe-25d .avatar-sheen{
   position:absolute;
-  inset:0;
   pointer-events:none;
 }
 .avatar-stage.avatar-safe-25d .avatar-depth-back{
   z-index:1;
-  inset:-3%;
-  background-image:url('./assets/digital-human.webp?v=25d-safe-1');
+  inset:-4%;
+  background-image:url('./assets/digital-human.webp?v=25d-safe-2');
   background-size:cover;
   background-position:center;
-  filter:blur(16px) saturate(.72) brightness(.46);
-  opacity:.24;
-  transform:translate3d(calc(var(--depth-x) * -5px),calc(var(--depth-y) * -4px),-28px) scale(1.08);
-  transition:opacity .25s ease;
+  filter:blur(22px) saturate(.68) brightness(.42);
+  opacity:calc(.14 + var(--attention) * .06);
+  transform:translate3d(calc(var(--px) * -8px),calc(var(--py) * -6px),-34px) scale(1.075);
+  will-change:transform,opacity;
+}
+.avatar-stage.avatar-safe-25d .avatar-depth-aura{
+  z-index:2;
+  left:8%;
+  right:8%;
+  top:7%;
+  bottom:11%;
+  border-radius:48% 48% 42% 42%;
+  background:
+    radial-gradient(circle at calc(50% + var(--lx) * 7%) calc(34% + var(--ly) * 5%),rgba(179,226,243,.13),transparent 34%),
+    radial-gradient(ellipse at 50% 72%,rgba(83,141,165,.08),transparent 55%);
+  filter:blur(20px);
+  opacity:calc(.44 + var(--attention) * .16);
+  transform:translate3d(calc(var(--px) * -3px),calc(var(--py) * -2px),-8px) scale(calc(1 + var(--breath) * .004));
+  will-change:transform,opacity;
 }
 .avatar-stage.avatar-safe-25d .avatar-photo-wrap{
   z-index:3;
+  inset:0;
   overflow:hidden;
-  transform:translate3d(calc(var(--px) * 5px),calc(var(--py) * 4px),18px) rotateY(calc(var(--px) * 1.35deg)) rotateX(calc(var(--py) * -0.8deg));
-  transform-origin:50% 46%;
+  transform:
+    translate3d(
+      calc(var(--px) * 4.4px),
+      calc(var(--py) * 3.1px - var(--scroll-depth) * 2px),
+      18px
+    )
+    rotateY(calc(var(--px) * .78deg))
+    rotateX(calc(var(--py) * -.44deg))
+    scale(calc(1 + var(--breath) * .0017));
+  transform-origin:50% 45%;
   will-change:transform;
+  backface-visibility:hidden;
 }
 .avatar-stage.avatar-safe-25d .avatar-photo-safe{
   width:100%;
@@ -38,44 +70,77 @@
   display:block;
   object-fit:cover;
   object-position:center;
-  transform:scale(1.035) translate3d(calc(var(--px) * -1.4px),calc(var(--py) * -1px),0);
-  filter:saturate(.94) contrast(1.025) brightness(.92);
+  transform:scale(1.018);
+  filter:saturate(.98) contrast(1.018) brightness(.955);
   backface-visibility:hidden;
   user-select:none;
   -webkit-user-drag:none;
 }
 .avatar-stage.avatar-safe-25d .avatar-light-field{
-  position:absolute;
-  inset:-12%;
+  inset:-14%;
   z-index:4;
-  pointer-events:none;
   background:
-    radial-gradient(circle at calc(50% + var(--px) * 7%) calc(38% + var(--py) * 5%),rgba(190,232,246,.12),transparent 32%),
-    linear-gradient(110deg,transparent 38%,rgba(205,239,250,.045) 48%,transparent 58%);
+    radial-gradient(circle at calc(50% + var(--lx) * 13%) calc(34% + var(--ly) * 9%),rgba(209,240,250,.13),transparent 29%),
+    radial-gradient(circle at calc(32% - var(--lx) * 4%) 82%,rgba(84,153,179,.055),transparent 26%);
   mix-blend-mode:screen;
-  transform:translate3d(calc(var(--px) * 7px),calc(var(--py) * 5px),25px);
+  opacity:calc(.46 + var(--attention) * .32);
+  transform:translate3d(calc(var(--lx) * 5px),calc(var(--ly) * 4px),28px);
+  will-change:transform,opacity;
+}
+.avatar-stage.avatar-safe-25d .avatar-sheen{
+  z-index:5;
+  inset:-22%;
+  background:linear-gradient(112deg,transparent 39%,rgba(211,241,251,.055) 48%,transparent 56%);
+  mix-blend-mode:screen;
+  opacity:calc(.24 + var(--attention) * .18 - var(--speed) * .08);
+  transform:translate3d(calc(var(--lx) * 9px),calc(var(--ly) * 5px),32px) rotate(.001deg);
+  animation:avatarSafeSheen 13s ease-in-out infinite alternate;
+  will-change:transform,opacity;
 }
 .avatar-stage.avatar-safe-25d .avatar-soft-shadow{
   position:absolute;
   z-index:2;
-  left:17%;
-  right:17%;
-  bottom:2.5%;
-  height:16%;
+  left:16%;
+  right:16%;
+  bottom:1.8%;
+  height:14%;
   border-radius:50%;
   background:radial-gradient(ellipse,rgba(0,0,0,.48),transparent 70%);
-  filter:blur(9px);
-  transform:translate3d(calc(var(--px) * -3px),calc(var(--py) * -2px),0);
+  filter:blur(10px);
+  opacity:.72;
+  transform:translate3d(calc(var(--px) * -2.5px),calc(var(--py) * -1.5px),0) scaleX(calc(1 + var(--breath) * .004));
   pointer-events:none;
+  will-change:transform;
 }
-.avatar-stage.avatar-safe-25d .avatar-orbit{z-index:2}
-.avatar-stage.avatar-safe-25d .avatar-reticle{z-index:6}
-.avatar-stage.avatar-safe-25d .live-chip{z-index:8}
-.avatar-stage.avatar-safe-25d .live-chip span:after{content:''}
-.avatar-stage.avatar-safe-25d.is-pointer .avatar-depth-back{opacity:.30}
+.avatar-stage.avatar-safe-25d .avatar-orbit{
+  z-index:2;
+  opacity:calc(.62 + var(--attention) * .22);
+}
+.avatar-stage.avatar-safe-25d .orbit-a{
+  transform:translate(calc(-50% + var(--px) * -2px),calc(-46% + var(--py) * -1px)) rotate(-17deg);
+}
+.avatar-stage.avatar-safe-25d .orbit-b{
+  transform:translate(calc(-50% + var(--px) * 2px),calc(-50% + var(--py) * 1px)) rotate(62deg);
+}
+.avatar-stage.avatar-safe-25d .avatar-reticle{z-index:7;opacity:calc(.72 + var(--attention) * .22)}
+.avatar-stage.avatar-safe-25d .live-chip{z-index:9}
+.avatar-stage.avatar-safe-25d.is-pointer .live-chip{border-color:rgba(199,232,243,.38);background:rgba(6,9,13,.60)}
+.avatar-stage.avatar-safe-25d.is-pointer .avatar-photo-wrap{transition:none}
+@keyframes avatarSafeSheen{
+  0%{translate:-2.5% -1.5%}
+  100%{translate:2.5% 1.5%}
+}
+@media (max-width:720px){
+  .avatar-stage.avatar-safe-25d .avatar-photo-wrap{
+    transform:translate3d(calc(var(--px) * 2.2px),calc(var(--py) * 1.6px),12px) rotateY(calc(var(--px) * .42deg)) rotateX(calc(var(--py) * -.24deg));
+  }
+  .avatar-stage.avatar-safe-25d .avatar-depth-back{transform:translate3d(calc(var(--px) * -4px),calc(var(--py) * -3px),-24px) scale(1.06)}
+}
 @media (prefers-reduced-motion:reduce){
   .avatar-stage.avatar-safe-25d .avatar-photo-wrap,
-  .avatar-stage.avatar-safe-25d .avatar-photo-safe,
   .avatar-stage.avatar-safe-25d .avatar-depth-back,
-  .avatar-stage.avatar-safe-25d .avatar-light-field{transform:none!important}
+  .avatar-stage.avatar-safe-25d .avatar-depth-aura,
+  .avatar-stage.avatar-safe-25d .avatar-light-field,
+  .avatar-stage.avatar-safe-25d .avatar-sheen,
+  .avatar-stage.avatar-safe-25d .avatar-soft-shadow{transform:none!important;animation:none!important}
 }
