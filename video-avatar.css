@@ -1,0 +1,143 @@
+.avatar-stage{
+  --va-x:0;
+  --va-y:0;
+  --va-energy:0;
+  --va-focus:0;
+}
+
+.va-video-backplate,
+.va-video-shell,
+.va-video-light,
+.va-video-hud{
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+}
+
+.va-video-backplate{
+  z-index:1;
+  inset:-5%;
+  opacity:0;
+  background:url('./assets/digital-human.webp?v=video-hybrid-1') center/cover no-repeat;
+  filter:blur(22px) saturate(.72) brightness(.38);
+  transform:translate3d(calc(var(--va-x) * -9px),calc(var(--va-y) * -6px),-45px) scale(1.12);
+  transition:opacity .55s ease;
+}
+
+.va-video-shell{
+  z-index:5;
+  overflow:hidden;
+  opacity:0;
+  transform-style:preserve-3d;
+  transform-origin:50% 42%;
+  transform:
+    translate3d(calc(var(--va-x) * 5px),calc(var(--va-y) * 3px),28px)
+    rotateY(calc(var(--va-x) * 2deg))
+    rotateX(calc(var(--va-y) * -1.05deg))
+    scale(calc(1 + var(--va-focus) * .015));
+  transition:opacity .45s ease;
+  will-change:transform,opacity;
+}
+
+.va-video-shell::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:
+    linear-gradient(90deg,rgba(203,241,255,calc(.018 + var(--va-energy) * .12)),transparent 14%,transparent 86%,rgba(203,241,255,calc(.018 + var(--va-energy) * .12))),
+    radial-gradient(circle at calc(50% + var(--va-x) * 19%) calc(34% + var(--va-y) * 12%),rgba(215,246,255,calc(.04 + var(--va-energy) * .07)),transparent 32%),
+    linear-gradient(180deg,transparent 64%,rgba(5,9,13,.18));
+  mix-blend-mode:screen;
+}
+
+.va-video{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center;
+  transform:scale(1.018);
+  filter:saturate(.94) contrast(1.025) brightness(.92);
+  backface-visibility:hidden;
+}
+
+.va-video-light{
+  z-index:6;
+  inset:-12%;
+  opacity:0;
+  background:
+    radial-gradient(circle at calc(50% + var(--va-x) * 24%) calc(37% + var(--va-y) * 16%),rgba(192,235,249,calc(.05 + var(--va-energy) * .16)),transparent 30%),
+    linear-gradient(108deg,transparent 38%,rgba(215,245,255,calc(.02 + var(--va-energy) * .09)) 49%,transparent 60%);
+  mix-blend-mode:screen;
+  transform:translate3d(calc(var(--va-x) * 12px),calc(var(--va-y) * 8px),44px);
+  transition:opacity .45s ease;
+}
+
+.va-video-hud{
+  z-index:9;
+  inset:auto 18px 18px 18px;
+  height:42px;
+  opacity:0;
+  display:grid;
+  grid-template-columns:1fr auto;
+  align-items:end;
+  gap:18px;
+  font:700 7px/1 var(--mono);
+  letter-spacing:.11em;
+  color:rgba(194,220,231,.48);
+  transition:opacity .45s ease;
+}
+
+.va-video-hud .va-signal{
+  position:relative;
+  height:18px;
+  border-top:1px solid rgba(185,218,232,.14);
+  background:repeating-linear-gradient(90deg,rgba(185,218,232,.13) 0 1px,transparent 1px 8%);
+}
+
+.va-video-hud .va-signal::after{
+  content:"";
+  position:absolute;
+  left:0;
+  top:-2px;
+  width:calc(18% + var(--va-energy) * 68%);
+  height:3px;
+  background:linear-gradient(90deg,var(--cyan-strong),rgba(215,243,255,0));
+  box-shadow:0 0 calc(4px + var(--va-energy) * 14px) rgba(215,243,255,.32);
+  transition:width .12s linear;
+}
+
+.avatar-stage.video-avatar-active .va-video-backplate{opacity:.26}
+.avatar-stage.video-avatar-active .va-video-shell{opacity:1}
+.avatar-stage.video-avatar-active .va-video-light{opacity:1}
+.avatar-stage.video-avatar-active .va-video-hud{opacity:1}
+.avatar-stage.video-avatar-active .mv-rig,
+.avatar-stage.video-avatar-active .mv-angle-meter{
+  opacity:0!important;
+  visibility:hidden!important;
+}
+.avatar-stage.video-avatar-active .mv-depth-halo{opacity:.28}
+.avatar-stage.video-avatar-active.is-video-tracking{
+  box-shadow:
+    0 34px 100px rgba(0,0,0,.4),
+    0 0 calc(12px + var(--va-energy) * 24px) rgba(147,211,234,calc(.02 + var(--va-energy) * .06)),
+    inset 0 0 100px rgba(91,147,169,.055);
+}
+
+@media(max-width:900px){
+  .va-video-shell{
+    transform:
+      translate3d(calc(var(--va-x) * 2px),calc(var(--va-y) * 2px),18px)
+      rotateY(calc(var(--va-x) * 1deg))
+      rotateX(calc(var(--va-y) * -.55deg))
+      scale(calc(1 + var(--va-focus) * .009));
+  }
+  .va-video-hud{display:none}
+}
+
+@media(prefers-reduced-motion:reduce){
+  .va-video-shell,
+  .va-video-backplate,
+  .va-video-light{transform:none!important}
+}
