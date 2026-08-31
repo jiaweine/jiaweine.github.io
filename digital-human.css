@@ -1,0 +1,35 @@
+.hero-stage.avatar-ready{
+  background:
+    radial-gradient(circle at 50% 42%,rgba(154,186,200,.17),transparent 34%),
+    radial-gradient(circle at 78% 16%,rgba(111,125,114,.12),transparent 28%),
+    linear-gradient(145deg,#fbfaf7 0%,#eef1f1 62%,#e7ecee 100%);
+}
+.hero-stage.avatar-ready:after{
+  width:520px;height:520px;right:-170px;top:-165px;
+  background:radial-gradient(circle,rgba(137,172,187,.16),rgba(137,172,187,0) 68%);
+}
+.avatar3d{cursor:crosshair}
+.avatar3d canvas{filter:saturate(.98) contrast(1.015)}
+.digital-human-status{
+  position:absolute;z-index:8;right:26px;top:52px;display:grid;
+  grid-template-columns:8px auto;grid-template-rows:auto auto;column-gap:9px;align-items:center;
+  padding:9px 11px;border:1px solid rgba(89,113,120,.18);border-radius:999px;
+  background:rgba(248,250,250,.68);backdrop-filter:blur(10px);box-shadow:0 8px 24px rgba(48,47,42,.05);
+  pointer-events:none;
+}
+.digital-human-status>span{grid-row:1/3;width:7px;height:7px;border-radius:50%;background:#6f9587;box-shadow:0 0 0 5px rgba(111,149,135,.11);animation:digitalPulse 2.4s ease-in-out infinite}
+.digital-human-status b{font:700 8px/1.15 var(--mono);letter-spacing:.12em;color:#526760}
+.digital-human-status small{font:500 8px/1.15 var(--mono);letter-spacing:.07em;color:var(--muted);margin-top:2px}
+.digital-human-hint{
+  position:absolute;z-index:8;left:50%;bottom:48px;transform:translateX(-50%);
+  font:700 8px/1 var(--mono);letter-spacing:.13em;color:rgba(52,53,47,.52);white-space:nowrap;
+  padding:8px 10px;border:1px solid rgba(25,26,23,.10);border-radius:999px;background:rgba(251,250,247,.62);backdrop-filter:blur(8px);pointer-events:none;
+}
+@keyframes digitalPulse{50%{opacity:.42;box-shadow:0 0 0 8px rgba(111,149,135,.04)}}
+@media(max-width:620px){
+  .digital-human-status{right:18px;top:48px;padding:8px 10px}.digital-human-status small{display:none}
+  .digital-human-hint{display:none}.avatar3d{cursor:default}
+}
+@media(prefers-reduced-motion:reduce){
+  .digital-human-status>span{animation:none}.avatar3d{cursor:default}
+}
