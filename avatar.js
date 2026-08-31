@@ -193,7 +193,7 @@ if (mount && stage) {
       camera.aspect=w/h;
       camera.updateProjectionMatrix();
       const compact=w<520;
-      root.scale.setScalar(compact?.92:1);
+      root.scale.setScalar(compact ? .92 : 1);
       camera.position.z=compact?6.55:6.25;
     };
     resize();
