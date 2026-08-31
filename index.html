@@ -7,8 +7,9 @@
   <meta name="description" content="Jiawei Wang — Statistics, multimodal AI, search and reliable agent systems." />
   <meta name="color-scheme" content="dark" />
   <title>Jiawei Wang — Statistics × AI Systems</title>
-  <link rel="preload" href="./assets/digital-human.webp" as="image" type="image/webp" />
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="preload" href="./assets/digital-human.webp?v=25d-safe-1" as="image" type="image/webp" />
+  <link rel="stylesheet" href="./styles.css?v=25d-safe-1" />
+  <link rel="stylesheet" href="./avatar-safe-25d.css?v=25d-safe-1" />
 </head>
 <body>
   <div class="noise" aria-hidden="true"></div>
@@ -49,19 +50,19 @@
       <div class="avatar-column reveal" data-avatar-shell>
         <div class="avatar-meta avatar-meta-top" aria-hidden="true">
           <span>DIGITAL HUMAN / 01</span>
-          <span>REAL-TIME WEBGL</span>
+          <span>STABLE 2.5D PORTRAIT</span>
         </div>
-        <div class="avatar-stage">
-          <div id="avatar3d" class="avatar-canvas" aria-label="Interactive digital portrait of Jiawei Wang"></div>
-          <img class="avatar-fallback" src="./assets/digital-human.webp" alt="3D-styled portrait of Jiawei Wang wearing white headphones" width="768" height="1024" />
+        <div class="avatar-stage avatar-safe-25d">
+          <div id="avatar3d" class="avatar-canvas" aria-hidden="true"></div>
+          <img class="avatar-fallback" src="./assets/digital-human.webp?v=25d-safe-1" alt="Digital portrait of Jiawei Wang wearing white headphones" width="768" height="1024" />
           <div class="avatar-reticle" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
           <div class="avatar-orbit orbit-a" aria-hidden="true"></div>
           <div class="avatar-orbit orbit-b" aria-hidden="true"></div>
-          <div class="live-chip" aria-hidden="true"><i></i><span>LIVE PORTRAIT</span></div>
+          <div class="live-chip" aria-hidden="true"><i></i><span>2.5D / STABLE</span></div>
         </div>
         <div class="avatar-meta avatar-meta-bottom" aria-hidden="true">
-          <span>MOVE POINTER TO SHIFT DEPTH</span>
-          <span>60 FPS TARGET</span>
+          <span>MOVE POINTER — SOFT DEPTH ONLY</span>
+          <span>NO BLINK · NO FACE WARP</span>
         </div>
       </div>
 
@@ -160,11 +161,11 @@
 
   <footer class="site-footer">
     <div><span class="brand-mark">JW</span><strong>Jiawei Wang</strong><small>Statistics × AI Systems</small></div>
-    <p>Designed as a real-time digital-human portfolio. The portrait uses WebGL depth/parallax motion and automatically falls back to a static image when motion or WebGL is unavailable.</p>
+    <p>The portrait uses a fail-safe 2.5D depth/parallax treatment: the original face pixels remain intact while only the whole portrait and background layers move.</p>
     <nav><a href="https://github.com/jiaweine" target="_blank" rel="noreferrer">GitHub ↗</a><a href="https://doi.org/10.1016/j.ins.2026.123925" target="_blank" rel="noreferrer">Paper ↗</a><a href="#top">Back to top ↑</a></nav>
   </footer>
 
-  <script src="./main.js"></script>
-  <script type="module" src="./avatar.js"></script>
+  <script src="./main.js?v=25d-safe-1"></script>
+  <script type="module" src="./avatar-safe-25d.js?v=25d-safe-1"></script>
 </body>
 </html>
