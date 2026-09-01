@@ -1,0 +1,48 @@
+name: Import avatar video
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/import-avatar-video.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  import-video:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download and optimize avatar loop
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p assets/avatar
+          curl -L --fail --retry 3 --retry-delay 2 \
+            'https://d2jqrm6oza8nb6.cloudfront.net/datasets/c62883dc-3376-4a66-a31d-9532e31c0505.mp4?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNDgwMGI5MGEwNTdjYTZkYiIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc4ODM1NTcyMn0.nF7d40_LCZZTfNjwAMt9_Gx_2nixk7viOZJHyupa2Kw' \
+            -o /tmp/avatar-source.mp4
+          ffmpeg -y -i /tmp/avatar-source.mp4 -an \
+            -vf 'scale=720:960:flags=lanczos,eq=contrast=1.02:brightness=0.002:saturation=0.98' \
+            -c:v libx264 -preset medium -crf 26 -profile:v high -level 4.0 \
+            -pix_fmt yuv420p -movflags +faststart assets/avatar/avatar.mp4
+          test -s assets/avatar/avatar.mp4
+
+      - name: Commit avatar asset
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add assets/avatar/avatar.mp4
+          if git diff --cached --quiet; then
+            echo 'Avatar video already current.'
+            exit 0
+          fi
+          git commit -m 'Add optimized homepage avatar video'
+          git push origin HEAD:main
