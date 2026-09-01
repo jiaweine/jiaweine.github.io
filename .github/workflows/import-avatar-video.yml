@@ -19,18 +19,14 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download and optimize avatar loop
+      - name: Download avatar loop
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p assets/avatar
           curl -L --fail --retry 3 --retry-delay 2 \
             'https://d2jqrm6oza8nb6.cloudfront.net/datasets/c62883dc-3376-4a66-a31d-9532e31c0505.mp4?_jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJrZXlIYXNoIjoiNDgwMGI5MGEwNTdjYTZkYiIsImJ1Y2tldCI6InJ1bndheS1kYXRhc2V0cyIsInN0YWdlIjoicHJvZCIsImV4cCI6MTc4ODM1NTcyMn0.nF7d40_LCZZTfNjwAMt9_Gx_2nixk7viOZJHyupa2Kw' \
-            -o /tmp/avatar-source.mp4
-          ffmpeg -y -i /tmp/avatar-source.mp4 -an \
-            -vf 'scale=720:960:flags=lanczos,eq=contrast=1.02:brightness=0.002:saturation=0.98' \
-            -c:v libx264 -preset medium -crf 26 -profile:v high -level 4.0 \
-            -pix_fmt yuv420p -movflags +faststart assets/avatar/avatar.mp4
+            -o assets/avatar/avatar.mp4
           test -s assets/avatar/avatar.mp4
 
       - name: Commit avatar asset
@@ -44,5 +40,5 @@ jobs:
             echo 'Avatar video already current.'
             exit 0
           fi
-          git commit -m 'Add optimized homepage avatar video'
+          git commit -m 'Add homepage avatar video loop'
           git push origin HEAD:main
