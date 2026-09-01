@@ -5,23 +5,18 @@
   --va-focus:0;
 }
 
-.va-video-backplate,
+/* The homepage hero is video-only. Never show a static portrait while the video loads. */
+.avatar-stage .avatar-fallback,
+.va-video-backplate{
+  display:none!important;
+}
+
 .va-video-shell,
 .va-video-light,
 .va-video-hud{
   position:absolute;
   inset:0;
   pointer-events:none;
-}
-
-.va-video-backplate{
-  z-index:1;
-  inset:-5%;
-  opacity:0;
-  background:url('./assets/digital-human.webp?v=clean-hero-1') center/cover no-repeat;
-  filter:blur(22px) saturate(.72) brightness(.38);
-  transform:translate3d(calc(var(--va-x) * -9px),calc(var(--va-y) * -6px),-45px) scale(1.12);
-  transition:opacity .55s ease;
 }
 
 .va-video-shell{
@@ -78,7 +73,6 @@
   display:none!important;
 }
 
-.avatar-stage.video-avatar-active .va-video-backplate{opacity:.26}
 .avatar-stage.video-avatar-active .va-video-shell{opacity:1}
 .avatar-stage.video-avatar-active .va-video-light{opacity:1}
 .avatar-stage.video-avatar-active .va-video-hud{display:none!important;opacity:0}
@@ -107,6 +101,5 @@
 
 @media(prefers-reduced-motion:reduce){
   .va-video-shell,
-  .va-video-backplate,
   .va-video-light{transform:none!important}
 }
