@@ -1,1 +1,0 @@
-Video chunks are loaded and concatenated in-browser by video-avatar.js. Generated for the homepage digital-human loop.
