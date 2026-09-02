@@ -1,39 +1,67 @@
-# Digital Human Video Asset
+# Interactive Avatar Experience
 
-The homepage is now video-first with a safe five-view fallback. When either asset below exists, the site automatically promotes the hero to video mode:
+The homepage hero includes a responsive digital-human presentation layer designed to feel integrated with the surrounding interface rather than behave like a standalone media element.
 
-- `assets/avatar/avatar.webm`
-- `assets/avatar/avatar.mp4`
+## Experience design
 
-## Target clip
+The avatar combines a looping portrait animation with pointer-aware motion, lighting response, depth cues, and the broader hero environment.
 
-Duration: 16–20 seconds, seamless loop, 24 or 30 fps, portrait framing, no camera cuts.
+Key behaviors include:
 
-Motion script:
+- subtle pointer-linked orientation and depth response
+- proximity-based focus treatment around the portrait
+- velocity-sensitive lighting and interface energy
+- smooth spring-style interpolation for natural motion
+- visibility-aware playback behavior
+- motion preferences that respect `prefers-reduced-motion`
 
-- 0–4s: face camera, subtle breathing only.
-- 4–7s: eyes glance slightly left; head stays mostly centered.
-- 7–10s: gentle head turn to the right, within about 10–15 degrees.
-- 10–13s: return naturally to center.
-- 13–16s: extremely subtle smile and slight chin lift.
-- 16–20s: settle exactly back into the starting pose for a seamless loop.
+The result is a restrained interactive presence that supports the portfolio's visual identity without competing with the research and project content.
 
-Blinking is allowed only when generated as part of the source video with complete eyelid motion. Do not synthesize eyelid movement in browser shaders or distort face pixels.
+## Visual direction
 
-## Visual continuity
+The avatar is designed around a consistent visual language:
 
-Keep identity, glasses, hairstyle, white over-ear headphones, navy suit, white shirt, black tie, facial proportions, lens shape, hairline and shoulder framing consistent with the approved front portrait.
+- dark editorial / cyber interface
+- clean portrait framing
+- restrained camera motion
+- soft environmental lighting
+- high-contrast typography and UI details
+- coordinated motion between the portrait and surrounding hero elements
 
-Background should remain neutral/dark enough for the website lighting layer to remain visible. A transparent-background WebM is preferred when the generation pipeline can produce clean alpha edges.
+Identity, wardrobe, headphones, framing, and lighting are kept visually consistent so the hero reads as one coherent composition.
 
-## Website interaction
+## Runtime structure
 
-The browser runtime intentionally keeps character motion small:
+The experience is separated into three layers:
 
-- pointer left/right: whole video container rotates up to about ±2 degrees;
-- background moves in the opposite direction for depth;
-- near-face pointer proximity adds at most ~1.5% scale;
-- fast pointer movement boosts only rim light, HUD and environment response;
-- face pixels are never warped.
+```text
+assets/avatar/avatar.mp4   # portrait motion asset
+video-avatar.css           # presentation and visual treatment
+video-avatar.js            # interaction and playback behavior
+```
 
-The multiview avatar remains the automatic fallback if the video asset is missing or cannot play.
+`video-avatar.js` tracks pointer position and movement energy, then exposes normalized interaction values to the presentation layer. CSS uses those values to coordinate transform, focus, lighting, and surrounding visual effects.
+
+This keeps the interaction layer lightweight while allowing the visual treatment to evolve independently.
+
+## Interaction model
+
+Pointer movement across the hero influences several presentation signals:
+
+1. horizontal and vertical position are normalized relative to the avatar stage;
+2. movement velocity contributes to the environment's visual energy;
+3. pointer proximity contributes to portrait focus;
+4. values are smoothly interpolated before being applied to the visual layer;
+5. the experience returns naturally toward its resting state when interaction ends.
+
+The motion system is intentionally subtle, preserving readability and keeping the portfolio content as the primary focus.
+
+## Performance
+
+The avatar experience uses native browser video, CSS transforms, and a compact JavaScript interaction loop. Playback responds to page visibility and viewport presence, helping keep runtime work aligned with what is actually visible on screen.
+
+## Role in the portfolio
+
+The avatar is one part of a broader interaction system that includes scroll reveals, active navigation, magnetic controls, project-card motion, and responsive layout behavior.
+
+Together, these elements create a portfolio that presents research and engineering work through a polished, cohesive interactive interface.
