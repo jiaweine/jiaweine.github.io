@@ -1,54 +1,86 @@
-# Jiawei Wang — Digital Human Portfolio
+# Jiawei Wang — Statistics × AI Systems
 
-A from-scratch GitHub Pages portfolio centered on an interactive WebGL digital portrait.
+A research and engineering portfolio focused on **statistics, multimodal AI, search & recommendation, and reliable agent systems**.
 
-## What changed
+[**Live Portfolio → jiaweine.github.io**](https://jiaweine.github.io)
 
-The previous multi-file portfolio implementation was intentionally replaced. The new site has one visual system and a smaller surface area:
+## Overview
 
-- `index.html` — semantic one-page portfolio
-- `styles.css` — responsive cyber/editorial visual system
-- `main.js` — scroll reveals, active navigation, role rotation, tilt and magnetic interactions
-- `avatar.js` — Three.js living portrait with depth deformation, pointer parallax, breathing motion, shader sweep, rings and particles
-- `assets/digital-human.webp` — optimized portrait with white headphones
+This site presents my academic interests, selected research, and engineering work through a focused interactive portfolio experience.
 
-No build step is required; it runs directly on GitHub Pages.
+The core theme is simple: **build AI systems that are measurable, testable, traceable, and useful beyond the first demo.**
 
-## Digital-human architecture
+### Focus areas
 
-The source is a single portrait, so the shipped version deliberately uses a **2.5D living portrait** instead of pretending a one-view image is already a geometrically correct full 3D head. The portrait is mapped to a highly subdivided plane. A face/chest/headphone depth field pushes vertices forward and the complete mesh responds to pointer movement. The shader adds restrained scan/sheen cues while preserving facial likeness.
+- **Statistics** — inference, evaluation, experimentation, uncertainty
+- **Multimodal AI** — representation learning, fusion, mixture-of-experts
+- **Search & Recommendation** — retrieval, ranking, evaluation
+- **Agent Systems** — tool orchestration, runtime design, verification, recovery
+- **Applied Mathematics** — optimization, approximation, structured modeling
 
-This gives the homepage real WebGL motion while keeping the supplied portrait recognizable, fast and deployment-friendly.
+## Selected work
 
-### Motion included
+| Project | Area | Description |
+| --- | --- | --- |
+| [**KAMEL**](https://github.com/jiaweine/KAMEL) | Multimodal Learning | KAN-Augmented Multimodal Expert Learning for heterogeneous and imbalanced tabular data. |
+| [**Recsys Harness**](https://github.com/jiaweine/recsys-harness) | Search & Recommendation | Evidence-first workbench for diagnosis, experimentation, evaluation, and recovery. |
+| [**EcomEvo**](https://github.com/jiaweine/EcomEvo-Harness) | Multimodal AI · Full Stack | AI workbench for business decisions with visible evidence and auditable task execution. |
+| [**Lingjing · 灵境**](https://github.com/jiaweine/lingjing-game-studio) | Agent Systems | Controllable execution workbench for game development and long-running multimodal tasks. |
 
-- pointer-driven head/depth parallax
-- low-amplitude breathing and idle drift
-- scroll-linked portrait offset
-- rotating 3D rings and ambient particles
-- holographic shader sweep and scan texture
-- card tilt, magnetic controls, role rotation and reveal animations
-- pauses when the tab/hero is not visible
-- respects `prefers-reduced-motion`
-- static portrait fallback when WebGL/CDN loading fails
+## Experience
 
-## Open-source references / upgrade path
+The portfolio combines a clean editorial/cyber visual language with lightweight interactive motion:
 
-The implementation currently uses **Three.js** directly because GitHub Pages can serve it without a build pipeline.
+- responsive one-page layout
+- scroll-linked reveals and progress feedback
+- active section navigation
+- interactive cards and magnetic controls
+- animated hero experience
+- dedicated visual/avatar presentation layer
+- reduced-motion support for accessibility preferences
+- direct GitHub Pages deployment with no build step
 
-For a future *true rigged avatar* version, these projects are the best fit:
+## Tech
 
-1. **pixiv/three-vrm** — VRM runtime on Three.js. Best next step after producing a `.vrm`/GLB model; supports avatar-oriented animation and expression workflows.
-2. **VAST-AI-Research/TripoSR** — open-source single-image 3D reconstruction. Useful for generating an initial mesh offline, then manually cleaning it before web delivery.
-3. **yfeng95/DECA** — face-focused reconstruction / expression capture research. Relevant if facial geometry is more important than a full-body mesh.
-4. **facebookresearch/PIFuHD** and **YuliangXiu/ECON** — heavier clothed-human reconstruction references; better suited to full-body capture than this chest-up homepage.
+- **HTML5** — semantic page structure
+- **CSS3** — responsive layout, visual system, transitions, motion
+- **JavaScript** — navigation, interaction, animation, visual effects
+- **GitHub Pages** — static hosting and delivery
 
-Recommended production path for true 3D: portrait → face/head reconstruction → cleanup in Blender → add headphones/suit → rig + blendshapes → export VRM/GLB → load with `three-vrm` → add idle/blink/gaze/lip-sync clips.
+The implementation intentionally stays lightweight and framework-free, making the site easy to deploy, inspect, and iterate on.
+
+## Project structure
+
+```text
+.
+├── index.html              # Main portfolio page
+├── styles.css              # Core visual system
+├── main.js                 # Core interactions
+├── experience-v2.css       # Extended motion / experience styling
+├── experience-v2.js        # Extended interaction layer
+├── video-avatar.css        # Avatar presentation styling
+├── video-avatar.js         # Avatar presentation logic
+└── assets/                 # Media and visual assets
+```
 
 ## Local preview
 
+Clone the repository and start any static HTTP server from the project root:
+
 ```bash
+git clone https://github.com/jiaweine/jiaweine.github.io.git
+cd jiaweine.github.io
 python -m http.server 8000
 ```
 
-Open `http://localhost:8000`.
+Then open:
+
+```text
+http://localhost:8000
+```
+
+## Research profile
+
+The portfolio is built around the intersection of statistical reasoning and production-minded AI engineering — from models and evaluation to runtimes, interfaces, and verifiable execution.
+
+**Research · Build · Measure · Iterate**
