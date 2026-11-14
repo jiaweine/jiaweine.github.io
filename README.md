@@ -1,6 +1,6 @@
-# Jiawei Wang — Statistics × AI Systems
+# Jiawei Wang — Applied AI & Engineering
 
-A research and engineering portfolio focused on **statistics, multimodal AI, search & recommendation, and reliable agent systems**.
+A research and engineering portfolio focused on **multimodal AI, search & recommendation, and reliable agent systems**.
 
 [**Live Portfolio → jiaweine.github.io**](https://jiaweine.github.io)
 
@@ -12,7 +12,7 @@ The core theme is simple: **build AI systems that are measurable, testable, trac
 
 ### Focus areas
 
-- **Statistics** — inference, evaluation, experimentation, uncertainty
+- **AI Evaluation** — benchmarks, robustness, reproducibility, experimentation
 - **Multimodal AI** — representation learning, fusion, mixture-of-experts
 - **Search & Recommendation** — retrieval, ranking, evaluation
 - **Agent Systems** — tool orchestration, runtime design, verification, recovery
@@ -81,6 +81,6 @@ http://localhost:8000
 
 ## Research profile
 
-The portfolio is built around the intersection of statistical reasoning and production-minded AI engineering — from models and evaluation to runtimes, interfaces, and verifiable execution.
+The portfolio is built around practical AI research and production-minded engineering — from models and evaluation to runtimes, interfaces, and verifiable execution.
 
 **Research · Build · Measure · Iterate**
