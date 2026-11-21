@@ -1,6 +1,6 @@
-# Jiawei Wang — Applied AI & Engineering
+# Jiawei Wang — AI, NLP & Large Language Models
 
-A research and engineering portfolio focused on **multimodal AI, search & recommendation, and reliable agent systems**.
+A research and engineering portfolio focused on **natural language processing (NLP), large language models (LLMs), multimodal AI, and reliable agent systems**.
 
 [**Live Portfolio → jiaweine.github.io**](https://jiaweine.github.io)
 
@@ -12,11 +12,11 @@ The core theme is simple: **build AI systems that are measurable, testable, trac
 
 ### Focus areas
 
+- **NLP & Large Language Models** — language understanding, LLM reasoning, adaptation, retrieval-augmented generation
 - **AI Evaluation** — benchmarks, robustness, reproducibility, experimentation
 - **Multimodal AI** — representation learning, fusion, mixture-of-experts
 - **Search & Recommendation** — retrieval, ranking, evaluation
 - **Agent Systems** — tool orchestration, runtime design, verification, recovery
-- **Applied Mathematics** — optimization, approximation, structured modeling
 
 ## Selected work
 
