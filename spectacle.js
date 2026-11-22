@@ -81,6 +81,8 @@
     const dy = (ny - .5) * 2;
     hero.style.setProperty('--holo-x', (dx * 24).toFixed(1) + 'px');
     hero.style.setProperty('--holo-y', (dy * 17).toFixed(1) + 'px');
+    hero.style.setProperty('--orbital-shift-x', (-dx * 7).toFixed(1) + 'px');
+    hero.style.setProperty('--orbital-shift-y', (-dy * 5).toFixed(1) + 'px');
     avatar.style.setProperty('--avatar-tilt-x', (dx * 1.9).toFixed(2) + 'deg');
     avatar.style.setProperty('--avatar-tilt-y', (-dy * 1.5).toFixed(2) + 'deg');
   }, { passive: true });
@@ -89,6 +91,8 @@
     target.inside = false;
     hero.style.setProperty('--holo-x', '0px');
     hero.style.setProperty('--holo-y', '0px');
+    hero.style.setProperty('--orbital-shift-x', '0px');
+    hero.style.setProperty('--orbital-shift-y', '0px');
     avatar.style.setProperty('--avatar-tilt-x', '0deg');
     avatar.style.setProperty('--avatar-tilt-y', '0deg');
   }, { passive: true });
