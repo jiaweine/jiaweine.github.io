@@ -58,6 +58,8 @@ The implementation intentionally stays lightweight and framework-free, making th
 ├── main.js                 # Core interactions
 ├── motion.css              # Cursor light, spotlight and hover presentation
 ├── motion.js               # Pointer tracking, magnets and reactive canvas field
+├── spectacle.css           # Cinematic aurora and holographic portrait visuals
+├── spectacle.js            # Responsive flow canvas, depth and chapter meter
 ├── experience-v2.css       # Extended motion / experience styling
 ├── experience-v2.js        # Extended interaction layer
 ├── video-avatar.css        # Avatar presentation styling
@@ -66,6 +68,9 @@ The implementation intentionally stays lightweight and framework-free, making th
 ```
 
 ## Interactive motion
+
+The cinematic layer extends the editorial portfolio with a lightweight aurora, a holographic video frame, a luminous canvas flow field, geometric project hover states, and a chapter reading meter.
+
 
 The interaction layer is implemented in native CSS and JavaScript, with no external runtime dependency. On desktop pointer devices it includes a softly eased cursor halo, magnetic controls, spotlight surfaces, subtle tilt, glancing project borders, and a responsive particle field in the hero.
 
