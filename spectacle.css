@@ -31,8 +31,8 @@
   aspect-ratio:1.2;
   top:4%;
   left:38%;
-  opacity:.4;
-  background:radial-gradient(ellipse,rgba(50,201,194,.23) 0%,rgba(71,122,215,.15) 43%,transparent 71%);
+  opacity:.63;
+  background:radial-gradient(ellipse,rgba(50,201,194,.30) 0%,rgba(71,122,215,.15) 43%,transparent 71%);
   animation:auraFloatA 15s ease-in-out infinite alternate;
 }
 .lightfield-aura-b{
@@ -40,8 +40,8 @@
   aspect-ratio:1;
   right:-8%;
   bottom:-14%;
-  opacity:.34;
-  background:radial-gradient(circle,rgba(149,116,227,.21),rgba(28,167,181,.10) 42%,transparent 74%);
+  opacity:.52;
+  background:radial-gradient(circle,rgba(149,116,227,.28),rgba(28,167,181,.10) 42%,transparent 74%);
   animation:auraFloatB 19s ease-in-out infinite alternate;
 }
 .lightfield-orbit{
@@ -51,7 +51,7 @@
   right:4%;
   top:3%;
   border-radius:50%;
-  transform:translate3d(calc(var(--holo-x) * -.22),calc(var(--holo-y) * -.22),0);
+  transform:translate3d(var(--orbital-shift-x,0px),var(--orbital-shift-y,0px),0);
 }
 .lightfield-orbit::before{
   content:"";
@@ -86,7 +86,7 @@
   height:100%;
   pointer-events:none;
   mix-blend-mode:screen;
-  opacity:.82;
+  opacity:.94;
   mask-image:linear-gradient(90deg,transparent 2%,rgba(0,0,0,.25) 27%,black 67%);
 }
 .hero-title{
