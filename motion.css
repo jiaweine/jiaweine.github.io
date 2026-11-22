@@ -1,0 +1,180 @@
+/* Interactive light and motion. Progressive enhancement for fine pointers. */
+.motion-ambient,
+.motion-cursor-ring,
+.motion-cursor-dot {
+  position:fixed;
+  top:0;left:0;
+  pointer-events:none;
+  opacity:0;
+  z-index:110;
+  will-change:transform,opacity;
+}
+.motion-ambient {
+  z-index:75;
+  width:600px;height:600px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(168,216,209,.095) 0%,rgba(144,203,200,.04) 26%,rgba(110,175,174,.014) 48%,transparent 68%);
+  mix-blend-mode:screen;
+  transition:opacity .4s ease;
+}
+.motion-cursor-ring{
+  width:39px;height:39px;
+  border:1px solid rgba(194,238,226,.58);
+  border-radius:50%;
+  box-shadow:0 0 17px rgba(162,231,217,.08),inset 0 0 10px rgba(162,231,217,.055);
+  transition:opacity .25s ease,width .28s cubic-bezier(.18,.84,.25,1.3),height .28s cubic-bezier(.18,.84,.25,1.3),border-color .3s ease;
+}
+.motion-cursor-dot{
+  width:5px;height:5px;
+  border-radius:50%;
+  background:#d8f1e7;
+  box-shadow:0 0 11px rgba(175,237,223,.72);
+  transition:opacity .18s ease;
+}
+.motion-enabled.motion-pointer-active .motion-ambient,
+.motion-enabled.motion-pointer-active .motion-cursor-ring,
+.motion-enabled.motion-pointer-active .motion-cursor-dot{opacity:1}
+.motion-enabled.motion-pointer-active.motion-over-link .motion-cursor-ring{
+  width:58px;height:58px;
+  border-color:rgba(218,246,238,.82);
+}
+.motion-enabled.motion-pointer-active.motion-over-link .motion-cursor-dot{opacity:.35}
+.motion-enabled.motion-pointer-active.motion-over-card .motion-cursor-ring{
+  width:50px;height:50px;border-color:rgba(196,236,221,.75)
+}
+.hero .motion-field{
+  position:absolute;inset:0;z-index:1;
+  width:100%;height:100%;display:block;
+  pointer-events:none;
+  opacity:.9;
+  mask-image:linear-gradient(90deg,rgba(0,0,0,.95),rgba(0,0,0,.55));
+}
+.hero-title-accent{
+  background:linear-gradient(105deg,#91b9b0 3%,#d8f1e5 19%,#a6cfc5 37%,#f0faf3 51%,#9ac1b8 67%,#c7e7dd 88%);
+  background-size:230% 100%;
+  background-position:var(--title-shift,54%) center;
+  background-clip:text;
+  -webkit-background-clip:text;
+  color:transparent;
+  -webkit-text-fill-color:transparent;
+  transition:background-position .36s ease;
+}
+.hero-lead{position:relative}
+.hero-lead::after{
+  content:"";display:block;width:0;height:1px;margin-top:23px;
+  background:linear-gradient(90deg,var(--accent),rgba(181,208,202,.1));
+  transition:width 1.2s cubic-bezier(.2,.85,.25,1);
+}
+.hero-copy:has(.hero-lead.visible) .hero-lead::after{width:min(145px,34vw)}
+.signal-card,.project,.avatar-stage,.hero-stats>div{--glow-x:50%;--glow-y:50%;position:relative;isolation:isolate}
+.signal-card::before,.project::before,.hero-stats>div::before{
+  content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(320px circle at var(--glow-x) var(--glow-y),rgba(178,235,219,.13),rgba(120,191,186,.037) 37%,transparent 73%);
+  opacity:0;transition:opacity .3s ease;
+}
+.signal-card:hover::before,.signal-card:focus-within::before,
+.project:hover::before,.project:focus-visible::before,
+.hero-stats>div:hover::before{opacity:1}
+.signal-card>*,.project>*,.hero-stats>div>*{position:relative;z-index:1}
+.signal-card{
+  --lift:0px;
+  transform:perspective(1100px) translate3d(0,var(--lift),0) rotateX(var(--tilt-y,0deg)) rotateY(var(--tilt-x,0deg));
+  transform-style:preserve-3d;
+  transition:transform .24s ease-out,border-color .28s ease,background .28s ease;
+}
+.signal-card:hover{--lift:-5px;box-shadow:0 19px 50px rgba(0,0,0,.16)}
+.signal-card::after{
+  content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+  border:1px solid transparent;
+  background:linear-gradient(115deg,transparent 15%,rgba(229,255,242,.65) 47%,transparent 75%) border-box;
+  mask:linear-gradient(#000 0 0) padding-box,linear-gradient(#000 0 0);
+  mask-composite:exclude;
+  opacity:0;
+  transition:opacity .24s ease;
+}
+.signal-card:hover::after{opacity:.48}
+.project{overflow:hidden}
+.project::before{
+  background:radial-gradient(460px circle at var(--glow-x) var(--glow-y),rgba(179,225,216,.12),rgba(123,183,172,.035) 40%,transparent 80%);
+}
+.project::after{
+  content:"";position:absolute;z-index:2;left:0;right:0;bottom:0;height:1px;
+  transform:scaleX(0);transform-origin:var(--glow-x) center;
+  background:linear-gradient(90deg,transparent,rgba(203,249,233,.88),transparent);
+  transition:transform .55s cubic-bezier(.2,.8,.2,1);
+  pointer-events:none;
+}
+.project:hover::after,.project:focus-visible::after{transform:scaleX(1)}
+.project .project-main h3{transition:color .28s ease,transform .4s cubic-bezier(.16,1,.3,1)}
+.project:hover .project-main h3,.project:focus-visible .project-main h3{color:#e3f7ee;transform:translateX(6px)}
+.project-arrow{transition:transform .38s cubic-bezier(.2,.95,.25,1.3),text-shadow .25s ease}
+.project:hover .project-arrow,.project:focus-visible .project-arrow{transform:translate(6px,-6px);text-shadow:0 0 22px rgba(174,233,212,.5)}
+.project-tech span{transition:border-color .3s ease,background .3s ease}
+.project:hover .project-tech span{border-color:rgba(190,235,220,.24);background:rgba(176,219,202,.04)}
+.hero-stats>div{transition:background .3s ease}
+.hero-stats>div:hover{background:rgba(169,219,206,.042)}
+.hero-stats b,.hero-stats span{transition:color .25s ease}
+.hero-stats>div:hover b,.hero-stats>div:hover span{color:#dbf8ea}
+.avatar-stage{
+  border-color:rgba(205,226,227,.31);
+  transition:border-color .4s ease,box-shadow .5s ease;
+}
+.avatar-stage::before{
+  content:"";position:absolute;z-index:6;inset:0;pointer-events:none;
+  background:radial-gradient(450px circle at var(--glow-x) var(--glow-y),rgba(209,246,232,.12),transparent 67%);
+  mix-blend-mode:screen;opacity:0;transition:opacity .4s ease;
+}
+.avatar-stage:hover{border-color:rgba(205,246,232,.57);box-shadow:0 25px 88px rgba(0,0,0,.32),0 0 56px rgba(154,210,195,.065)}
+.avatar-stage:hover::before{opacity:1}
+.avatar-art-ring{animation:motion-art-breathe 12s ease-in-out infinite}
+.button,.header-link{
+  position:relative;isolation:isolate;overflow:hidden;
+  --mag-x:0px;--mag-y:0px;
+  transform:translate3d(var(--mag-x),var(--mag-y),0);
+  transition:transform .12s ease-out,background .25s ease,color .25s ease,border-color .25s ease;
+}
+.button::before,.header-link::before{
+  content:"";position:absolute;inset:-1px;z-index:-1;pointer-events:none;
+  background:linear-gradient(110deg,transparent 25%,rgba(255,255,255,.27) 45%,transparent 64%);
+  transform:translateX(-165%);transition:transform .76s cubic-bezier(.15,.7,.25,1);
+}
+.button:hover::before,.button:focus-visible::before,
+.header-link:hover::before,.header-link:focus-visible::before{transform:translateX(165%)}
+.button:hover{transform:translate3d(var(--mag-x),var(--mag-y),0)}
+.button.motion-releasing,.header-link.motion-releasing{
+  transition:transform .57s cubic-bezier(.18,1.4,.36,1),background .25s ease,border-color .25s ease;
+}
+.motion-ripple{
+  position:absolute;z-index:4;left:0;top:0;width:12px;height:12px;border:1px solid rgba(228,255,243,.73);
+  border-radius:50%;pointer-events:none;
+  transform:translate(-50%,-50%) scale(0);opacity:1;
+  animation:motion-ripple .6s cubic-bezier(.18,.75,.25,1) forwards;
+}
+@keyframes motion-ripple{
+  100%{transform:translate(-50%,-50%) scale(11);opacity:0}
+}
+@keyframes motion-art-breathe{
+  50%{transform:scale(1.045);opacity:.75}
+}
+@media (max-width:970px){
+  .hero .motion-field{opacity:.44}
+}
+@media (max-width:720px){
+  .motion-ambient,.motion-cursor-ring,.motion-cursor-dot,.hero .motion-field{display:none!important}
+  .signal-card{transform:none!important;box-shadow:none!important}
+  .avatar-art-ring{animation:none}
+}
+@media (hover:none),(pointer:coarse){
+  .motion-ambient,.motion-cursor-ring,.motion-cursor-dot{display:none!important}
+  .signal-card{transform:none!important}
+  .hero-title-accent{background-position:54% center!important}
+}
+@media (prefers-reduced-motion:reduce){
+  .motion-ambient,.motion-cursor-ring,.motion-cursor-dot,.hero .motion-field{display:none!important}
+  .hero-title-accent{transition:none}
+  .hero-lead::after{transition:none;width:min(145px,34vw)}
+  .button,.header-link,.signal-card,.project,.avatar-stage,
+  .project .project-main h3,.project .project-arrow{transform:none!important;transition:none!important}
+  .avatar-art-ring{animation:none}
+  .motion-ripple{display:none}
+}
