@@ -56,12 +56,28 @@ The implementation intentionally stays lightweight and framework-free, making th
 ├── index.html              # Main portfolio page
 ├── styles.css              # Core visual system
 ├── main.js                 # Core interactions
+├── motion.css              # Cursor light, spotlight and hover presentation
+├── motion.js               # Pointer tracking, magnets and reactive canvas field
 ├── experience-v2.css       # Extended motion / experience styling
 ├── experience-v2.js        # Extended interaction layer
 ├── video-avatar.css        # Avatar presentation styling
 ├── video-avatar.js         # Avatar presentation logic
 └── assets/                 # Media and visual assets
 ```
+
+## Interactive motion
+
+The interaction layer is implemented in native CSS and JavaScript, with no external runtime dependency. On desktop pointer devices it includes a softly eased cursor halo, magnetic controls, spotlight surfaces, subtle tilt, glancing project borders, and a responsive particle field in the hero.
+
+Motion responds to the presence of a fine pointer, pauses when relevant content is outside the viewport, and respects reduced motion preferences. Mobile touch interactions retain the page's static editorial composition.
+
+### Open source design references
+
+These projects informed the interaction direction, but no source files or third party runtime code were copied into this portfolio.
+
+- [Codrops MagneticButtons](https://github.com/codrops/MagneticButtons) for magnetic control behavior
+- [HoverUI](https://github.com/raqibnur/hoverui) for spotlight surface patterns and thoughtful interaction timing
+- [Interactive Spotlight Effect](https://github.com/FelippeCav/interactive-spotlight-effect) for pointer directed light
 
 ## Local preview
 
