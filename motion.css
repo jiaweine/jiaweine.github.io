@@ -178,3 +178,17 @@
   .avatar-art-ring{animation:none}
   .motion-ripple{display:none}
 }
+
+
+/* Preserve scroll entrance transitions while allowing interactive card tilt. */
+.signal-card.reveal{
+  transition:opacity .7s var(--ease),transform .38s cubic-bezier(.18,.85,.26,1),border-color .28s ease,background .28s ease;
+}
+.signal-card.reveal:not(.visible){opacity:0;transform:translateY(18px)}
+.signal-card.reveal.visible{
+  opacity:1;
+  transform:perspective(1100px) translate3d(0,var(--lift,0px),0) rotateX(var(--tilt-y,0deg)) rotateY(var(--tilt-x,0deg));
+}
+@media(max-width:720px),(hover:none),(pointer:coarse),(prefers-reduced-motion:reduce){
+  .signal-card.reveal.visible{transform:none!important}
+}
